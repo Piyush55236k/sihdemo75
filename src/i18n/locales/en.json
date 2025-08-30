@@ -1,0 +1,114 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "quests": "Quests",
+    "community": "Community",
+    "profile": "Profile",
+    "home": "Home"
+  },
+  "landing": {
+    "title": "FarmQuest",
+    "subtitle": "Grow Smarter. Get Rewarded.",
+    "description": "Transform your farming practices through gamified learning. Complete quests, earn rewards, and build a sustainable future for Indian agriculture.",
+    "startQuest": "Start Your First Quest",
+    "joinMovement": "Join the Movement",
+    "whyChoose": "Why Choose FarmQuest?",
+    "platformDescription": "Our platform combines the best of gaming mechanics with practical farming knowledge",
+    "learningThroughPlay": "Learning Through Play",
+    "learningDescription": "Master sustainable farming practices through interactive challenges and fun activities.",
+    "personalizedQuests": "Personalized Quests",
+    "personalizedDescription": "Get custom farming missions tailored to your crops and local conditions.",
+    "progressTracker": "Progress Tracker",
+    "progressDescription": "Monitor your sustainability journey with detailed analytics and achievements.",
+    "community": "Community",
+    "communityDescription": "Connect with fellow farmers, share tips, and celebrate successes together.",
+    "trustedBy": "Trusted by Farmers Across India"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}! 👋",
+    "farmLocation": "Green Valley Farm",
+    "sustainabilityScore": "Sustainability Score",
+    "keepGoing": "Keep going! You're making great progress.",
+    "currentLevel": "Level {{level}}",
+    "sustainableFarmer": "Sustainable Farmer",
+    "totalPoints": "Total Points: {{points}}",
+    "rank": "Rank: #{{rank}}",
+    "activeQuests": "Active Quests",
+    "active": "Active",
+    "progress": "Progress",
+    "recentAchievements": "Recent Achievements",
+    "communityActivity": "Community Activity",
+    "community": {
+      "sarahM": "Sarah M.",
+      "action1": "completed the Soil Health Quest", 
+      "timeAgo1": "2 hours ago",
+      "mikeR": "Mike R.",
+      "action2": "earned the Composting Champion badge",
+      "timeAgo2": "4 hours ago",
+      "elenaP": "Elena P.", 
+      "action3": "shared a tip about crop rotation",
+      "timeAgo3": "6 hours ago"
+    },
+    "stats": {
+      "co2Reduced": "CO₂ Reduced",
+      "waterSaved": "Water Saved",
+      "energyUsed": "Energy Used",
+      "efficiency": "Efficiency"
+    },
+    "quests": {
+      "waterConservation": "Water Conservation Challenge",
+      "waterConservationDesc": "Reduce water usage by 20% this week",
+      "daysLeft1": "2 days left",
+      "waterGuardian": "Water Guardian",
+      "organicFertilizer": "Organic Fertilizer Trial",
+      "organicFertilizerDesc": "Switch to organic fertilizer for one crop section",
+      "daysLeft2": "5 days left",
+      "ecoPioneer": "Eco Pioneer"
+    },
+    "achievements": {
+      "firstHarvest": "First Harvest",
+      "firstHarvestDesc": "Successfully completed your first sustainable harvest",
+      "daysAgo1": "2 days ago",
+      "waterSaver": "Water Saver",
+      "waterSaverDesc": "Reduced water consumption by 15% last month",
+      "daysAgo2": "1 week ago"
+    }
+  },
+  "quests": {
+    "availableQuests": "Available Quests",
+    "questDescription": "Choose from various farming challenges designed to improve your sustainability and earn rewards.",
+    "difficulty": "Difficulty",
+    "rewards": "Rewards",
+    "startQuest": "Start Quest",
+    "questDetails": "Quest Details",
+    "questSteps": "Quest Steps",
+    "tips": "Tips & Guidelines",
+    "uploadPhoto": "Take a photo or upload an image",
+    "completeQuest": "Complete Quest"
+  },
+  "community": {
+    "communityHub": "Community Hub",
+    "communityDescription": "Connect with fellow farmers, share knowledge, and celebrate achievements together.",
+    "leaderboard": "Leaderboard",
+    "discussions": "Discussions",
+    "searchPlaceholder": "Search farmers or topics...",
+    "sustainabilityScore": "Sustainability Score",
+    "totalPoints": "Total Points",
+    "questsCompleted": "Quests Completed",
+    "points": "pts"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "close": "Close",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort"
+  }
+}
