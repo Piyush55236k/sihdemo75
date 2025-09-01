@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // File removed
+=======
+>>>>>>> ce17b631e47435b0fbcc27a198d9eafa8e5cd39b
 import React, { useState } from 'react';
 import { Globe, ChevronDown } from 'lucide-react';
 import { useAutoTranslation } from '../hooks/useAutoTranslation.jsx'

@@ -2,6 +2,10 @@ import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Leaf, Trophy, Users, BarChart3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+<<<<<<< HEAD
+=======
+import LanguageSwitcher from './LanguageSwitcher'
+>>>>>>> ce17b631e47435b0fbcc27a198d9eafa8e5cd39b
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -50,8 +54,14 @@ const Navbar = () => {
             })}
           </div>
 
+<<<<<<< HEAD
           {/* Right side - CTA only */}
           <div className="hidden md:flex items-center space-x-4">
+=======
+          {/* Right side - Language Switcher and CTA */}
+          <div className="hidden md:flex items-center space-x-4">
+            <LanguageSwitcher />
+>>>>>>> ce17b631e47435b0fbcc27a198d9eafa8e5cd39b
             <Link
               to="/dashboard"
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
@@ -92,7 +102,14 @@ const Navbar = () => {
                 )
               })}
               
+<<<<<<< HEAD
               {/* Language Switcher for Mobile removed */}
+=======
+              {/* Language Switcher for Mobile */}
+              <div className="px-3 py-2">
+                <LanguageSwitcher />
+              </div>
+>>>>>>> ce17b631e47435b0fbcc27a198d9eafa8e5cd39b
               
               <div className="pt-2">
                 <Link
