@@ -1,0 +1,12 @@
+{
+  "welcome": "Welcome to FarmWise",
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "quests": "Quests",
+    "community": "Community"
+  },
+  "common": {
+    "startFarming": "Start Farming"
+  }
+}

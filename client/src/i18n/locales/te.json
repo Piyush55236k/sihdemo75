@@ -1,0 +1,12 @@
+{
+  "welcome": "FarmWise కు స్వాగతం",
+  "nav": {
+    "home": "హోమ్",
+    "dashboard": "డాష్‌బోర్డ్",
+    "quests": "క్వెస్ట్స్",
+    "community": "సముదాయం"
+  },
+  "common": {
+    "startFarming": "వ్యవసాయాన్ని ప్రారంభించండి"
+  }
+}

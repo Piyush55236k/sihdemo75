@@ -1,0 +1,12 @@
+{
+  "welcome": "FarmWise இற்கு வரவேற்கிறோம்",
+  "nav": {
+    "home": "முகப்பு",
+    "dashboard": "டாஷ்போர்டு",
+    "quests": "விருதுகள்",
+    "community": "சமூகம்"
+  },
+  "common": {
+    "startFarming": "விவசாயத்தை தொடங்குங்கள்"
+  }
+}
