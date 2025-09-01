@@ -1,11 +1,13 @@
 // Enhanced API services for the FarmWise app
 // Addresses gaps in existing farmer apps with advanced AI features
 
+import config from '../config/env.js';
+
 // Temporarily comment out complex imports to fix immediate errors
 // import { PersonalizationService, OfflineService } from './personalizationService.js'
 // import { TrustService } from './accessibilityService.js'
 
-const API_BASE_URL = import.meta.env?.VITE_API_URL || 'http://localhost:3001/api'
+const API_BASE_URL = config.api.baseUrl;
 
 // Simulate network delay
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))

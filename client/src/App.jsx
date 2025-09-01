@@ -11,6 +11,7 @@ import TestComponent from "./components/TestComponent";
 import Dashboard from "./pages/Dashboard";
 import QuestPage from "./pages/QuestPage";
 import CommunityPage from "./pages/CommunityPage";
+import ChatBotWidget from "./components/ChatBotWidget";
 
 function App() {
   const [showLangModal, setShowLangModal] = useState(false);
@@ -76,6 +77,9 @@ function App() {
               }
             />
           </Routes>
+
+          {/* AI Chatbot Widget - Available on all pages */}
+          <ChatBotWidget />
         </div>
       </Router>
     </AuthProvider>

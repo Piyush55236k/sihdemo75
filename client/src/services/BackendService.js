@@ -1,7 +1,9 @@
 // Mock API Service for data fetching
+import config from '../config/env.js';
+
 class BackendService {
   constructor() {
-    this.baseUrl = 'http://localhost:3001/api' // Mock backend URL
+    this.baseUrl = config.api.baseUrl // Use config instead of hardcoded URL
     this.mockData = {
       marketPrices: this.generateMockMarketData(),
       weatherData: this.generateMockWeatherData(),
