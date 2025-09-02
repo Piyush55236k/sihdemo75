@@ -48,6 +48,14 @@ const config = {
     },
   },
 
+  // Weather API Configuration
+  weather: {
+    apiKey: import.meta.env.VITE_OPENWEATHER_API_KEY || 'demo_key',
+    baseUrl: import.meta.env.VITE_OPENWEATHER_BASE_URL || 'https://api.openweathermap.org/data/2.5',
+    timeout: parseInt(import.meta.env.VITE_WEATHER_TIMEOUT) || 10000,
+    enableRealAPI: import.meta.env.VITE_ENABLE_REAL_WEATHER_API === 'true',
+  },
+
   // Chat Configuration
   chat: {
     maxMessageLength: parseInt(import.meta.env.VITE_MAX_MESSAGE_LENGTH) || 1000,

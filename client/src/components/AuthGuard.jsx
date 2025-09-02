@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { useAuth } from './AuthProvider';
-import AuthModal from './AuthModal';
-import { Lock, UserPlus, LogIn } from 'lucide-react';
-import { TranslatedText } from '../hooks/useAutoTranslation.jsx';
+import React, { useState } from "react";
+import { useAuth } from "./AuthProvider";
+import AuthModal from "./AuthModal";
+import { Lock, UserPlus, LogIn } from "lucide-react";
+import { TranslatedText } from "../hooks/useAutoTranslation.jsx";
 
-const AuthGuard = ({ children, feature = 'feature', onClose }) => {
+const AuthGuard = ({ children, feature = "feature", onClose }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
+  const [authMode, setAuthMode] = useState("login");
 
   // Show loading state
   if (isLoading) {
@@ -30,7 +30,8 @@ const AuthGuard = ({ children, feature = 'feature', onClose }) => {
     <>
       {/* Authentication Prompt Modal */}
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 text-center">{/* Icon */}
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 text-center">
+          {/* Icon */}
           {/* Icon */}
           <div className="mb-6">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
@@ -45,8 +46,14 @@ const AuthGuard = ({ children, feature = 'feature', onClose }) => {
 
           {/* Message */}
           <p className="text-gray-600 mb-8">
-            <TranslatedText 
-              text={`Please login to access ${feature === 'chat' ? 'AI Chat Assistant' : feature === 'feedback' ? 'Feedback Form' : 'this feature'}. Join thousands of farmers getting personalized farming advice!`} 
+            <TranslatedText
+              text={`Please login to access ${
+                feature === "chat"
+                  ? "AI Chat Assistant"
+                  : feature === "feedback"
+                  ? "Feedback Form"
+                  : "this feature"
+              }. Join thousands of farmers getting personalized farming advice!`}
             />
           </p>
 
@@ -64,7 +71,7 @@ const AuthGuard = ({ children, feature = 'feature', onClose }) => {
               <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3"></div>
               <TranslatedText text="Track your farming progress" />
             </div>
-            {feature === 'feedback' && (
+            {feature === "feedback" && (
               <div className="flex items-center text-sm text-gray-700">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
                 <TranslatedText text="Share feedback and suggestions" />
@@ -77,7 +84,7 @@ const AuthGuard = ({ children, feature = 'feature', onClose }) => {
             {/* Login Button */}
             <button
               onClick={() => {
-                setAuthMode('login');
+                setAuthMode("login");
                 setShowAuthModal(true);
               }}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
@@ -89,7 +96,7 @@ const AuthGuard = ({ children, feature = 'feature', onClose }) => {
             {/* Signup Button */}
             <button
               onClick={() => {
-                setAuthMode('signup');
+                setAuthMode("signup");
                 setShowAuthModal(true);
               }}
               className="w-full bg-white hover:bg-gray-50 text-emerald-600 font-semibold py-3 px-6 rounded-lg border-2 border-emerald-600 transition-colors duration-200 flex items-center justify-center"

@@ -8,5 +8,10 @@
   },
   "common": {
     "startFarming": "Start Farming"
+  },
+  "cropAdvisory": {
+    "title": "Crop Advisory",
+    "description": "Get AI-powered crop recommendations based on soil analysis and weather data",
+    "startAnalysis": "Start Soil Analysis"
   }
 }

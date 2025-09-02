@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { MessageCircle, X, FileText } from 'lucide-react';
-import { useAuth } from './AuthProvider';
-import ChatBot from './ChatBot';
-import FeedbackForm from './FeedbackForm';
-import AuthGuard from './AuthGuard';
+import React, { useState } from "react";
+import { MessageCircle, X, FileText } from "lucide-react";
+import { useAuth } from "./AuthProvider";
+import ChatBot from "./ChatBot";
+import FeedbackForm from "./FeedbackForm";
+import AuthGuard from "./AuthGuard";
 
 const ChatBotWidget = () => {
   const { isAuthenticated } = useAuth();
@@ -44,7 +44,7 @@ const ChatBotWidget = () => {
             title="Feedback Form"
           >
             <FileText className="w-5 h-5" />
-            
+
             {/* Tooltip */}
             <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
               Give Feedback
@@ -58,7 +58,7 @@ const ChatBotWidget = () => {
           <button
             onClick={toggleChat}
             className={`group bg-emerald-600 hover:bg-emerald-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-105 ${
-              isChatOpen ? 'rotate-45' : ''
+              isChatOpen ? "rotate-45" : ""
             }`}
             title="Chat with Farming Assistant"
           >
@@ -67,17 +67,17 @@ const ChatBotWidget = () => {
             ) : (
               <MessageCircle className="w-6 h-6" />
             )}
-            
+
             {/* New message indicator */}
             {hasNewMessage && !isChatOpen && (
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse">
                 <div className="absolute inset-0 bg-red-500 rounded-full animate-ping"></div>
               </div>
             )}
-            
+
             {/* Tooltip */}
             <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-              {isChatOpen ? 'Close Chat' : 'Ask Farming Questions'}
+              {isChatOpen ? "Close Chat" : "Ask Farming Questions"}
               <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
             </div>
           </button>
@@ -92,25 +92,25 @@ const ChatBotWidget = () => {
       )}
 
       {showFeedbackAuth && (
-        <AuthGuard feature="feedback" onClose={() => setShowFeedbackAuth(false)}>
+        <AuthGuard
+          feature="feedback"
+          onClose={() => setShowFeedbackAuth(false)}
+        >
           <div />
         </AuthGuard>
       )}
 
       {/* Feedback Form - Only render if authenticated and open */}
       {isAuthenticated && (
-        <FeedbackForm 
-          isOpen={isFeedbackOpen} 
+        <FeedbackForm
+          isOpen={isFeedbackOpen}
           onClose={() => setIsFeedbackOpen(false)}
         />
       )}
 
       {/* Chat Interface - Only render if authenticated and open */}
       {isAuthenticated && (
-        <ChatBot 
-          isOpen={isChatOpen} 
-          onClose={() => setIsChatOpen(false)}
-        />
+        <ChatBot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
       )}
     </>
   );

@@ -138,7 +138,7 @@ const ChatBot = ({ isOpen, onClose }) => {
         type: "assistant",
         content:
           language === "hi"
-            ? `संदेश बहुत लंबा है। कृपया ${config.chat.maxMessageLength} अक्षरों के अंदर संदेश भेजें।`
+            ? `संदेश बहुत लंबा है। कृपया ${config.chat.maxMessageLength} अक्षरों से कम में लिखें।`
             : `Message too long. Please keep it under ${config.chat.maxMessageLength} characters.`,
         timestamp: new Date(),
       };
@@ -158,18 +158,17 @@ const ChatBot = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${config.api.baseUrl}/chat`, {
+      const response = await fetch(`${config.api.baseURL}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${
-            user?.access_token || localStorage.getItem("supabase.auth.token")
-          }`,
+          Authorization: `Bearer ${user?.token}`,
         },
         body: JSON.stringify({
           message: inputMessage,
-          language: language,
+          language,
           userId: user?.id,
+          sessionId: `chat_${Date.now()}`,
         }),
       });
 
@@ -182,18 +181,20 @@ const ChatBot = ({ isOpen, onClose }) => {
       const assistantMessage = {
         id: Date.now() + 1,
         type: "assistant",
-        content: data.response,
+        content: data.response || data.message,
         timestamp: new Date(),
+        confidence: data.confidence,
+        sources: data.sources,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // Speak the response if speech is enabled
-      if (speechEnabled) {
+      // Text-to-speech for assistant response
+      if (speechEnabled && data.response) {
         speakMessage(data.response, language);
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Chat error:", error);
 
       const errorMessage = {
         id: Date.now() + 1,
@@ -250,164 +251,167 @@ const ChatBot = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-t-2xl">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-              <Bot className="w-6 h-6 text-emerald-600" />
-            </div>
+            <Bot className="w-8 h-8" />
             <div>
-              <h3 className="text-lg font-semibold text-gray-800">
+              <h3 className="text-xl font-bold">
                 {language === "hi" ? "कृषि सहायक" : "Farming Assistant"}
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-emerald-100 text-sm">
                 {language === "hi"
-                  ? "आपका स्मार्ट कृषि सलाहकार"
-                  : "Your smart farming advisor"}
+                  ? "आपका स्मार्ट कृषि सहायक"
+                  : "Your Smart Agriculture Assistant"}
               </p>
             </div>
           </div>
 
-          {/* Controls */}
           <div className="flex items-center space-x-2">
             {/* Language Selector */}
-            <div className="flex items-center space-x-2">
-              <Globe className="w-4 h-4 text-gray-500" />
-              <select
-                value={language}
-                onChange={(e) => handleLanguageChange(e.target.value)}
-                className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                {config.language.supported.map((lang) => (
-                  <option key={lang} value={lang}>
-                    {lang === "en"
-                      ? "English"
-                      : lang === "hi"
-                      ? "हिन्दी"
-                      : lang.toUpperCase()}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={language}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="bg-white/20 text-white border border-white/30 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+            >
+              <option value="en" className="text-gray-800">
+                English
+              </option>
+              <option value="hi" className="text-gray-800">
+                हिन्दी
+              </option>
+            </select>
 
-            {/* Speech Toggle */}
+            {/* Voice Toggle */}
             <button
               onClick={() => setSpeechEnabled(!speechEnabled)}
-              className={`p-2 rounded-lg transition-colors ${
-                speechEnabled
-                  ? "bg-emerald-100 text-emerald-600"
-                  : "bg-gray-100 text-gray-400"
-              }`}
-              title={
-                language === "hi" ? "आवाज़ चालू/बंद करें" : "Toggle speech"
-              }
+              className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              title={speechEnabled ? "Disable voice" : "Enable voice"}
             >
               {speechEnabled ? (
-                <Volume2 className="w-4 h-4" />
+                <Volume2 className="w-5 h-5" />
               ) : (
-                <VolumeX className="w-4 h-4" />
+                <VolumeX className="w-5 h-5" />
               )}
             </button>
 
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-white/20 rounded-full transition-colors"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-6 h-6" />
             </button>
           </div>
         </div>
 
         {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
-          <div className="space-y-4">
-            {messages.map((message) => (
+        <div
+          ref={chatContainerRef}
+          className="flex-1 overflow-y-auto p-4 space-y-4"
+          style={{ scrollBehavior: "smooth" }}
+        >
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex items-start space-x-3 ${
+                message.type === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
+              {message.type === "assistant" && (
+                <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+              )}
+
               <div
-                key={message.id}
-                className={`flex items-start space-x-3 ${
-                  message.type === "user" ? "justify-end" : "justify-start"
+                className={`max-w-2xl px-4 py-3 rounded-2xl ${
+                  message.type === "user"
+                    ? "bg-emerald-500 text-white ml-8"
+                    : "bg-gray-100 text-gray-800 mr-8"
                 }`}
               >
-                {message.type === "assistant" && (
-                  <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-5 h-5 text-emerald-600" />
+                <div className="whitespace-pre-wrap break-words">
+                  {language === "hi" && message.contentHi
+                    ? message.contentHi
+                    : message.content}
+                </div>
+
+                {message.sources && (
+                  <div className="mt-2 text-sm opacity-75">
+                    <div className="font-medium mb-1">Sources:</div>
+                    {message.sources.map((source, index) => (
+                      <div key={index}>• {source}</div>
+                    ))}
                   </div>
                 )}
 
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
+                  className={`text-xs mt-2 opacity-60 ${
                     message.type === "user"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-gray-100 text-gray-800"
+                      ? "text-emerald-100"
+                      : "text-gray-500"
                   }`}
                 >
-                  <p className="text-sm leading-relaxed">
-                    {message.type === "assistant" &&
-                    language === "hi" &&
-                    message.contentHi
-                      ? message.contentHi
-                      : message.content}
-                  </p>
-                  <p
-                    className={`text-xs mt-2 ${
-                      message.type === "user"
-                        ? "text-emerald-100"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-
-                {message.type === "user" && (
-                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-5 h-5 text-gray-600" />
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* Loading indicator */}
-            {isLoading && (
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                  <div className="flex items-center space-x-2">
-                    <Loader className="w-4 h-4 animate-spin text-gray-500" />
-                    <span className="text-sm text-gray-500">
-                      {language === "hi"
-                        ? "जवाब तैयार कर रहे हैं..."
-                        : "Thinking..."}
+                  {message.timestamp.toLocaleTimeString()}
+                  {message.confidence && (
+                    <span className="ml-2">
+                      ({Math.round(message.confidence * 100)}% confident)
                     </span>
-                  </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
+
+              {message.type === "user" && (
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+              )}
+            </div>
+          ))}
+
+          {isLoading && (
+            <div className="flex items-start space-x-3">
+              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div className="bg-gray-100 text-gray-800 px-4 py-3 rounded-2xl mr-8">
+                <div className="flex items-center space-x-2">
+                  <Loader className="w-4 h-4 animate-spin" />
+                  <span>
+                    {language === "hi" ? "सोच रहा हूं..." : "Thinking..."}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
         <div className="border-t border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-end space-x-2">
             {/* Voice Input Button */}
             <button
               onClick={handleVoiceToggle}
               disabled={isLoading}
-              className={`p-3 rounded-full transition-all duration-200 ${
+              className={`p-3 rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
                 isListening
-                  ? "bg-red-500 text-white animate-pulse"
-                  : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-              title={language === "hi" ? "वॉइस इनपुट" : "Voice input"}
+                  ? "bg-red-100 text-red-600 animate-pulse"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+              title={
+                language === "hi"
+                  ? isListening
+                    ? "बोलना बंद करें"
+                    : "बोलना शुरू करें"
+                  : isListening
+                  ? "Stop listening"
+                  : "Start voice input"
+              }
             >
               {isListening ? (
                 <MicOff className="w-5 h-5" />
@@ -424,11 +428,12 @@ const ChatBot = ({ isOpen, onClose }) => {
                 onKeyPress={handleKeyPress}
                 placeholder={
                   language === "hi"
-                    ? "अपना सवाल टाइप करें या वॉइस का इस्तेमाल करें..."
-                    : "Type your question or use voice input..."
+                    ? "कुछ पूछें... (जैसे: मेरी फसल में पत्ते पीले हो रहे हैं)"
+                    : "Ask anything... (e.g., My crop leaves are turning yellow)"
                 }
-                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
                 rows={1}
+                style={{ minHeight: "48px", maxHeight: "120px" }}
                 disabled={isLoading}
               />
             </div>
@@ -436,25 +441,21 @@ const ChatBot = ({ isOpen, onClose }) => {
             {/* Send Button */}
             <button
               onClick={sendMessage}
-              disabled={!inputMessage.trim() || isLoading}
-              className="p-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-full transition-colors"
-              title={language === "hi" ? "भेजें" : "Send"}
+              disabled={isLoading || !inputMessage.trim()}
+              className="p-3 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
-              <Send className="w-5 h-5" />
+              {isLoading ? (
+                <Loader className="w-5 h-5 animate-spin" />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
             </button>
           </div>
 
-          {/* Voice listening indicator */}
-          {isListening && (
-            <div className="mt-2 text-center">
-              <div className="inline-flex items-center space-x-2 text-red-600">
-                <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-                <span className="text-sm">
-                  {language === "hi" ? "सुन रहे हैं..." : "Listening..."}
-                </span>
-              </div>
-            </div>
-          )}
+          {/* Character Counter */}
+          <div className="mt-2 text-xs text-gray-500 text-right">
+            {inputMessage.length}/{config.chat.maxMessageLength}
+          </div>
         </div>
       </div>
     </div>

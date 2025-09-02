@@ -81,7 +81,7 @@ function App() {
 
           {/* AI Chatbot Widget - Available on all pages */}
           <ChatBotWidget />
-          
+
           {/* Authentication Status Indicator */}
           <AuthStatus />
         </div>

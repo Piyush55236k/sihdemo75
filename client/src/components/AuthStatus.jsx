@@ -1,7 +1,7 @@
-import React from 'react';
-import { useAuth } from '../components/AuthProvider';
-import { LogOut, User, Shield, CheckCircle } from 'lucide-react';
-import { TranslatedText } from '../hooks/useAutoTranslation.jsx';
+import React from "react";
+import { useAuth } from "../components/AuthProvider";
+import { LogOut, User, Shield, CheckCircle } from "lucide-react";
+import { TranslatedText } from "../hooks/useAutoTranslation.jsx";
 
 const AuthStatus = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -32,7 +32,7 @@ const AuthStatus = () => {
               <TranslatedText text="Logged In" />
             </div>
             <div className="text-xs text-gray-600">
-              {user?.name || user?.phone || 'Demo User'}
+              {user?.name || user?.phone || "Demo User"}
             </div>
           </div>
         </div>

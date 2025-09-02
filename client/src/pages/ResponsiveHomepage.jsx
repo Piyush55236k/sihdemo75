@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../components/AuthProvider";
 import AuthModal from "../components/AuthModal";
+import CropAdvisory from "../components/CropAdvisory";
 import ImprovedProfilePage from "./ImprovedProfilePage";
 import PestCheckPage from "./PestCheckPage.jsx";
 import MarketPricesPage from "./MarketPricesPage.jsx";
@@ -73,6 +74,7 @@ const ResponsiveHomepage = () => {
   // UI State
   const [currentPage, setCurrentPage] = useState("home");
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showCropAdvisory, setShowCropAdvisory] = useState(false);
   const [micEnabled, setMicEnabled] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -612,39 +614,27 @@ const ResponsiveHomepage = () => {
                   )}
                 </p>
 
-                {/* Ask for Advice Section */}
+                {/* Crop Advisory Section */}
                 <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 mb-6">
                   <h2 className="text-xl font-semibold text-slate-800 mb-4">
-                    <TranslatedText>Ask for Farming Advice</TranslatedText>
+                    <TranslatedText>Crop Advisory</TranslatedText>
                   </h2>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      type="text"
-                      value={adviceInput}
-                      onChange={(e) => setAdviceInput(e.target.value)}
-                      placeholder="Try: Should I irrigate my wheat crop tomorrow?"
-                      className="flex-1 px-4 py-3 border border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white text-slate-700 placeholder-slate-400"
-                      onKeyPress={(e) =>
-                        e.key === "Enter" && handleAdviceSubmit()
-                      }
-                    />
-                    <button
-                      onClick={handleAdviceSubmit}
-                      disabled={isLoading || !adviceInput.trim()}
-                      className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white px-6 py-3 rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 min-w-32"
-                    >
-                      {isLoading ? (
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <Send className="w-5 h-5" />
-                          <span>
-                            <TranslatedText>Ask</TranslatedText>
-                          </span>
-                        </>
-                      )}
-                    </button>
-                  </div>
+                  <p className="text-slate-600 mb-4">
+                    <TranslatedText>
+                      Get AI-powered crop recommendations based on soil analysis
+                      and weather data
+                    </TranslatedText>
+                  </p>
+                  <button
+                    onClick={() => setShowCropAdvisory(true)}
+                    className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    <Camera className="w-6 h-6" />
+                    <span>
+                      <TranslatedText>Start Soil Analysis</TranslatedText>
+                    </span>
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
                 </div>
 
                 {/* Guest Features Notice */}
@@ -1083,6 +1073,12 @@ const ResponsiveHomepage = () => {
           </div>
         </div>
       )}
+
+      {/* Crop Advisory Modal */}
+      <CropAdvisory
+        isOpen={showCropAdvisory}
+        onClose={() => setShowCropAdvisory(false)}
+      />
     </div>
   );
 };
