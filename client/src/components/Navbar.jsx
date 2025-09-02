@@ -15,6 +15,7 @@ const Navbar = () => {
       label: t("nav.dashboard", "Dashboard"),
       icon: BarChart3,
     },
+    { path: "/soil-fertilizer", label: t("nav.soilFertilizer", "Soil Fertilizer"), icon: Trophy },
     { path: "/quests", label: t("nav.quests", "Quests"), icon: Trophy },
     { path: "/community", label: t("nav.community", "Community"), icon: Users },
   ];

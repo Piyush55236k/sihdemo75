@@ -9,6 +9,7 @@ import NewHomepage from "./pages/NewHomepage";
 import ResponsiveHomepage from "./pages/ResponsiveHomepage";
 import TestComponent from "./components/TestComponent";
 import Dashboard from "./pages/Dashboard";
+import SoilFertilizerPage from "./pages/SoilFertilizerPage";
 import QuestPage from "./pages/QuestPage";
 import CommunityPage from "./pages/CommunityPage";
 import ChatBotWidget from "./components/ChatBotWidget";
@@ -30,7 +31,7 @@ function App() {
 
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <div className="min-h-screen bg-surface-alt">
           {/* <LanguageSelector open={showLangModal} onSelect={handleLangSelect} /> */}
           <Routes>
@@ -74,6 +75,15 @@ function App() {
                 <>
                   <Navbar />
                   <CommunityPage />
+                </>
+              }
+            />
+            <Route
+              path="/soil-fertilizer"
+              element={
+                <>
+                  <Navbar />
+                  <SoilFertilizerPage />
                 </>
               }
             />

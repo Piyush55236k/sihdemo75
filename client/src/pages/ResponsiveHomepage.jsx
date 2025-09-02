@@ -298,12 +298,9 @@ const ResponsiveHomepage = () => {
         setCurrentPage("pestCheck");
         break;
       case 2: // Soil/Fertilizer
-        setAdviceInput(
-          currentLanguage === "hi"
-            ? "मिट्टी और उर्वरक के बारे में सलाह चाहिए"
-            : "Need advice about soil and fertilizer"
-        );
-        handleAdviceSubmit();
+        if (window && window.location) {
+          window.location.href = "/soil-fertilizer";
+        }
         break;
       case 3: // Market Prices
         setCurrentPage("marketPrices");
