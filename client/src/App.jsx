@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import QuestPage from "./pages/QuestPage";
 import CommunityPage from "./pages/CommunityPage";
 import ChatBotWidget from "./components/ChatBotWidget";
+import AuthStatus from "./components/AuthStatus";
 
 function App() {
   const [showLangModal, setShowLangModal] = useState(false);
@@ -80,6 +81,9 @@ function App() {
 
           {/* AI Chatbot Widget - Available on all pages */}
           <ChatBotWidget />
+          
+          {/* Authentication Status Indicator */}
+          <AuthStatus />
         </div>
       </Router>
     </AuthProvider>

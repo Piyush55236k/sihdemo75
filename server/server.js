@@ -7,6 +7,7 @@ require('dotenv').config();
 
 // Import routes
 const chatRoutes = require('./routes/chat');
+const feedbackRoutes = require('./routes/feedback');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -92,6 +93,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api', chatLimiter);
 app.use('/api', chatRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

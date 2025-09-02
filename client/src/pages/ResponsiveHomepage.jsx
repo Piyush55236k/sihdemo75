@@ -614,28 +614,9 @@ const ResponsiveHomepage = () => {
 
                 {/* Ask for Advice Section */}
                 <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-slate-800">
-                      <TranslatedText>Ask for Farming Advice</TranslatedText>
-                    </h2>
-                    <button
-                      onClick={() => {
-                        // Open the ChatBot widget
-                        const chatButton = document.querySelector(
-                          '[title="Chat with Farming Assistant"]'
-                        );
-                        if (chatButton) {
-                          chatButton.click();
-                        }
-                      }}
-                      className="text-emerald-600 hover:text-emerald-700 text-sm font-medium flex items-center space-x-1"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>
-                        <TranslatedText>Advanced AI Chat</TranslatedText>
-                      </span>
-                    </button>
-                  </div>
+                  <h2 className="text-xl font-semibold text-slate-800 mb-4">
+                    <TranslatedText>Ask for Farming Advice</TranslatedText>
+                  </h2>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <input
                       type="text"
@@ -802,68 +783,6 @@ const ResponsiveHomepage = () => {
                 </div>
               </div>
             )}
-
-            {/* AI ChatBot Promotion Card */}
-            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-6 lg:p-8 shadow-lg border border-blue-100">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm">
-                    <MessageCircle className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-slate-800 mb-2">
-                    <TranslatedText>AI Farming Assistant</TranslatedText>
-                  </h3>
-                  <p className="text-slate-600 mb-4">
-                    <TranslatedText>
-                      Get instant, personalized farming advice with our advanced
-                      AI assistant. Ask questions in Hindi or English, use voice
-                      commands, and get weather-integrated responses.
-                    </TranslatedText>
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                      onClick={() => {
-                        // Open the ChatBot widget
-                        const chatButton = document.querySelector(
-                          '[title="Chat with Farming Assistant"]'
-                        );
-                        if (chatButton) {
-                          chatButton.click();
-                        }
-                      }}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                      <span>
-                        <TranslatedText>Start AI Chat</TranslatedText>
-                      </span>
-                    </button>
-                    <div className="flex items-center space-x-4 text-sm text-slate-600">
-                      <div className="flex items-center space-x-1">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>
-                          <TranslatedText>Voice Support</TranslatedText>
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <span>
-                          <TranslatedText>Hindi/English</TranslatedText>
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                        <span>
-                          <TranslatedText>Weather Data</TranslatedText>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right Column - Weather & Info */}

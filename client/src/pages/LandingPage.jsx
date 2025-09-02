@@ -272,24 +272,6 @@ const LandingPage = () => {
               <TranslatedText>Start Your Journey</TranslatedText>
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
-            <button
-              onClick={() => {
-                // Navigate to homepage and open the ChatBot widget
-                window.location.href = "/";
-                setTimeout(() => {
-                  const chatButton = document.querySelector(
-                    '[title="Chat with Farming Assistant"]'
-                  );
-                  if (chatButton) {
-                    chatButton.click();
-                  }
-                }, 1000);
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center"
-            >
-              <MessageCircle className="w-5 h-5 mr-2" />
-              <TranslatedText>Try AI Assistant</TranslatedText>
-            </button>
             <Link
               to="/community"
               className="bg-transparent text-white border-2 border-white hover:bg-white hover:text-green-600 px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center"

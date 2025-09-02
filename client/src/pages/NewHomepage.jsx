@@ -742,28 +742,9 @@ const NewHomepage = () => {
 
           {/* Hero Ask Section */}
           <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold text-slate-800">
-                <TranslatedText>Ask for Advice</TranslatedText>
-              </h1>
-              <button
-                onClick={() => {
-                  // Open the ChatBot widget
-                  const chatButton = document.querySelector(
-                    '[title="Chat with Farming Assistant"]'
-                  );
-                  if (chatButton) {
-                    chatButton.click();
-                  }
-                }}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>
-                  <TranslatedText>AI Chat</TranslatedText>
-                </span>
-              </button>
-            </div>
+            <h1 className="text-2xl font-bold text-slate-800 mb-4 text-center">
+              <TranslatedText>Ask for Advice</TranslatedText>
+            </h1>
             <div className="relative">
               <input
                 type="text"
