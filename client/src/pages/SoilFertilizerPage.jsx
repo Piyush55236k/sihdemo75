@@ -21,7 +21,7 @@ const SoilFertilizerPage = () => {
     setError(null);
     setRecommendation(null);
     try {
-      const res = await fetch('https://sihmodel.onrender.com/recommend', {
+      const res = await fetch('https://sihdemo75.onrender.com/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ crop, inputs }),

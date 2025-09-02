@@ -3,7 +3,7 @@ from flask_cors import CORS
 from math import ceil
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins="*", supports_credentials=True)
 
 # ---------------- Your Functions ---------------- #
 
