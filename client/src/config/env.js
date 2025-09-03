@@ -16,7 +16,7 @@ const config = {
 
   // App Configuration
   app: {
-    name: import.meta.env.VITE_APP_NAME || 'FarmWise',
+    name: import.meta.env.VITE_APP_NAME || 'Agro_Mitra',
     version: import.meta.env.VITE_APP_VERSION || '1.0.0',
     environment: import.meta.env.VITE_APP_ENVIRONMENT || 'development',
   },

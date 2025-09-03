@@ -12,8 +12,8 @@ class LanguageService {
         quests: 'Quests',
         
         // Header
-        appName: 'FarmWise',
-        loading: 'Loading FarmWise...',
+        appName: 'Agro_Mitra',
+        loading: 'Loading Agro_Mitra...',
         
         // Weather
         weather: 'Weather',

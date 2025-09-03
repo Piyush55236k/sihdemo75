@@ -1,4 +1,4 @@
-# 🌾 FarmWise Demo Guide
+# 🌾 Agro_Mitra Demo Guide
 
 ## ✅ **Current Status - Working Features**
 
@@ -90,7 +90,7 @@ Replace the mock OTP system in `AuthProvider.jsx` with:
 const response = await fetch('https://api.twilio.com/2010-04-01/Accounts/YOUR_SID/Messages.json', {
   method: 'POST',
   headers: { 'Authorization': 'Bearer YOUR_TOKEN' },
-  body: `To=${phoneNumber}&From=YOUR_NUMBER&Body=Your FarmWise OTP: ${otp}`
+  body: `To=${phoneNumber}&From=YOUR_NUMBER&Body=Your Agro_Mitra OTP: ${otp}`
 })
 
 // Option 2: Fast2SMS (India)

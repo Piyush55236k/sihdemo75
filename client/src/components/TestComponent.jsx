@@ -6,7 +6,7 @@ const TestComponent = () => {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold text-primary">
-        <TranslatedText>FarmWise Test</TranslatedText>
+        <TranslatedText>Agro_Mitra Test</TranslatedText>
       </h1>
       <p className="text-gray-600">
         <TranslatedText>Testing basic functionality...</TranslatedText>

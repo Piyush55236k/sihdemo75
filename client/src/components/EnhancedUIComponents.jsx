@@ -1,4 +1,4 @@
-// Enhanced UI Components for FarmWise - Addresses Digital Literacy Gaps
+// Enhanced UI Components for Agro_Mitra - Addresses Digital Literacy Gaps
 // Designed for low-digital-literacy farmers with voice-first interaction
 
 import React from 'react'

@@ -1,4 +1,4 @@
-// Enhanced personalization service for FarmWise
+// Enhanced personalization service for Agro_Mitra
 // Addresses the gap of generic advice in existing farmer apps
 
 class PersonalizationService {

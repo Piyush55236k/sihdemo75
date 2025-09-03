@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import logo1 from '../../../logo1.jpg';
 import { TranslatedText } from '../hooks/useAutoTranslation.jsx'
 import {
   Trophy,
@@ -103,12 +104,15 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2"><TranslatedText>Welcome back, {userData.name}!</TranslatedText> 👋</h1>
-          <p className="text-gray-600 flex items-center">
-            <MapPin className="w-4 h-4 mr-1" />
-            <TranslatedText>Your Farm</TranslatedText> • {new Date().toLocaleDateString()}
-          </p>
+        <div className="mb-8 flex items-center space-x-4">
+          <img src={logo1} alt="Agro_Mitra Logo" className="w-12 h-12 rounded-xl shadow-sm object-cover" />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2"><TranslatedText>Welcome back to Agro_Mitra, {userData.name}!</TranslatedText> 👋</h1>
+            <p className="text-gray-600 flex items-center">
+              <MapPin className="w-4 h-4 mr-1" />
+              <TranslatedText>Your Farm</TranslatedText> • {new Date().toLocaleDateString()}
+            </p>
+          </div>
         </div>
 
         {/* Stats Grid */}

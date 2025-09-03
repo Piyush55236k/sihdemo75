@@ -59,7 +59,7 @@ VITE_TRANSLATION_ENABLED=true
 
 #### Application Settings
 ```bash
-VITE_APP_NAME=FarmWise Assistant
+VITE_APP_NAME=Agro_Mitra Assistant
 VITE_APP_VERSION=1.0.0
 VITE_DEBUG_MODE=false
 ```

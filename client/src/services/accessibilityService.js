@@ -1,4 +1,4 @@
-// Enhanced accessibility and UI service for FarmWise
+// Enhanced accessibility and UI service for Agro_Mitra
 // Addresses digital literacy barriers and complex UI issues
 
 class AccessibilityService {
@@ -23,7 +23,7 @@ class AccessibilityService {
     return {
       welcome: {
         hi: "नमस्कार! फार्मवाइज़ में आपका स्वागत है। मैं आपकी खेती में मदद करने के लिए यहाँ हूँ।",
-        en: "Welcome to FarmWise! I'm here to help you with your farming needs."
+        en: "Welcome to Agro_Mitra! I'm here to help you with your farming needs."
       },
       microphoneInstruction: {
         hi: "माइक्रोफ़ोन बटन दबाएं और अपना प्रश्न पूछें। उदाहरण: कल मुझे पानी देना चाहिए?",

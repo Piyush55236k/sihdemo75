@@ -1,4 +1,4 @@
-// Enhanced API services for the FarmWise app
+// Enhanced API services for the Agro_Mitra app
 // Addresses gaps in existing farmer apps with advanced AI features
 
 import config from '../config/env.js';

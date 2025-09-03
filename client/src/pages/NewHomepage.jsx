@@ -520,7 +520,7 @@ const NewHomepage = () => {
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <div className="text-text-muted">
-            <TranslatedText>Loading FarmWise...</TranslatedText>
+            <TranslatedText>Loading Agro_Mitra...</TranslatedText>
           </div>
         </div>
       </div>
@@ -619,7 +619,7 @@ const NewHomepage = () => {
               <Leaf className="w-5 h-5 text-white" />
             </div>
             <span className="font-display font-semibold text-slate-800">
-              <TranslatedText>FarmWise</TranslatedText>
+              <TranslatedText>Agro_Mitra</TranslatedText>
             </span>
           </div>
           <div className="flex items-center space-x-3">

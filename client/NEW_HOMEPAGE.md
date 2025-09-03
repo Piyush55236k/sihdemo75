@@ -1,4 +1,4 @@
-# FarmWise - New Homepage Implementation
+# Agro_Mitra - New Homepage Implementation
 
 ## Overview
 The new homepage has been completely redesigned according to the provided specifications, featuring a mobile-first approach with a focus on smart farming assistance.
@@ -26,7 +26,7 @@ The new homepage has been completely redesigned according to the provided specif
 ## 📱 Homepage Sections
 
 ### 1. Top App Bar
-- **Logo**: Leaf icon with "FarmWise" branding
+- **Logo**: Leaf icon with "Agro_Mitra" branding
 - **Language Switcher**: EN/HI toggle (integrates with auto-translation system)
 - **Mic Toggle**: Voice input enable/disable
 

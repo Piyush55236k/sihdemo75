@@ -48,7 +48,7 @@ const AuthGuard = ({ children, feature = "feature", onClose, onAuthSuccess }) =>
       case "feedback":
         return {
           title: "📝 Feedback & Suggestions",
-          description: "Help us improve FarmWise by sharing your experience",
+          description: "Help us improve Agro_Mitra by sharing your experience",
           benefits: [
             "Share your farming experiences",
             "Suggest new features",
@@ -144,7 +144,7 @@ const AuthGuard = ({ children, feature = "feature", onClose, onAuthSuccess }) =>
           {/* Call to Action */}
           <div className="bg-emerald-50 rounded-xl p-4 mb-6">
             <p className="text-emerald-800 font-medium text-sm">
-              🚀 Join thousands of farmers getting smarter with FarmWise!
+              🚀 Join thousands of farmers getting smarter with Agro_Mitra!
             </p>
           </div>
 

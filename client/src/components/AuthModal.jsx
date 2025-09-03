@@ -222,7 +222,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
               ) : mode === 'login' ? (
                 <TranslatedText>Welcome Back!</TranslatedText>
               ) : (
-                <TranslatedText>Join FarmWise</TranslatedText>
+                <TranslatedText>Join Agro_Mitra</TranslatedText>
               )}
             </h1>
             

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import logo1 from '../../../logo1.jpg';
 import { useAuth } from "../components/AuthProvider";
 import AuthModal from "../components/AuthModal";
 import CropAdvisoryDemoPage from "./CropAdvisoryDemoPage";
@@ -432,7 +433,7 @@ const ResponsiveHomepage = () => {
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <div className="text-slate-600">
-            <TranslatedText>Loading FarmWise...</TranslatedText>
+            <TranslatedText>Loading Agro_Mitra...</TranslatedText>
           </div>
           <div className="text-xs text-slate-400 mt-2">
             {!weatherData && "Loading weather data..."}
@@ -515,11 +516,9 @@ const ResponsiveHomepage = () => {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-sm">
-                <Leaf className="w-6 h-6 text-white" />
-              </div>
+              <img src={logo1} alt="Agro_Mitra Logo" className="w-10 h-10 rounded-xl shadow-sm object-cover" />
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-slate-800">FarmWise</h1>
+                <h1 className="text-xl font-bold text-slate-800">Agro_Mitra</h1>
                 <p className="text-xs text-slate-500">
                   Smart Farming Assistant
                 </p>
@@ -674,7 +673,7 @@ const ResponsiveHomepage = () => {
                       Welcome back, {user?.name || "Farmer"}!
                     </TranslatedText>
                   ) : (
-                    <TranslatedText>Welcome to FarmWise</TranslatedText>
+                    <TranslatedText>Welcome to Agro_Mitra</TranslatedText>
                   )}
                 </h1>
                 <p className="text-lg text-slate-600 mb-6">
@@ -1004,7 +1003,7 @@ const ResponsiveHomepage = () => {
             {!isAuthenticated && (
               <div className="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl p-6 shadow-lg text-white">
                 <h3 className="text-xl font-bold mb-3">
-                  <TranslatedText>Join FarmWise Today</TranslatedText>
+                  <TranslatedText>Join Agro_Mitra Today</TranslatedText>
                 </h3>
                 <p className="text-emerald-100 mb-4">
                   <TranslatedText>
