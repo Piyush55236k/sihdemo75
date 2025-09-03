@@ -1,13 +1,51 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from math import ceil
+import logging
+import os
+from typing import Any, Dict, Tuple, List, Optional
 
-app = Flask(__name__)
-CORS(app, origins="*", supports_credentials=True)
+def create_app() -> Flask:
+    """Factory to create and configure the Flask app for production."""
+    app = Flask(__name__)
+    # Restrict CORS to frontend domain in production
+    frontend_origin = os.environ.get("FRONTEND_ORIGIN", "http://localhost:5173")
+    CORS(app, origins=[frontend_origin], supports_credentials=True)
 
-# ---------------- Your Functions ---------------- #
+    # Set up logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
-def interpret(value, low=None, high=None):
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        logging.error(f"Unhandled error: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+    # ---------------- API Endpoint ---------------- #
+    @app.route("/recommend", methods=["POST"])
+    def recommend():
+        """API endpoint for fertilizer recommendation."""
+        data = request.json
+        crop = data.get("crop")
+        inputs = data.get("inputs", {})
+        try:
+            msgs, plan = recommend_for_farmer(inputs, crop)
+            return jsonify({"messages": msgs, "fertilizer_plan": plan})
+        except ValueError as ve:
+            logging.warning(f"Validation error: {ve}")
+            return jsonify({"error": str(ve)}), 400
+        except Exception as e:
+            logging.error(f"Error in recommend: {e}")
+            return jsonify({"error": "Prediction failed"}), 500
+
+    return app
+
+app = create_app()
+
+# ---------------- Utility Functions ---------------- #
+
+def interpret(value: Any, low: Optional[float]=None, high: Optional[float]=None) -> Optional[float]:
+    """Interpret qualitative or quantitative soil test values."""
     if isinstance(value, (int, float)):
         return float(value)
     v = str(value).strip().lower()
@@ -17,10 +55,11 @@ def interpret(value, low=None, high=None):
     try: return float(value)
     except: return None
 
-def round_up(x):
+def round_up(x: float) -> int:
+    """Round up to nearest integer."""
     return ceil(x)
 
-baseline_npk = {
+baseline_npk: Dict[str, Tuple[int, int, int]] = {
     "wheat": (120, 60, 40),
     "paddy": (150, 60, 40),
     "maize": (150, 75, 50),
@@ -44,7 +83,11 @@ ref_thresholds = {
     "B":(0.5,1), "OC":(0.5,0.8), "pH":(6.5,7.5), "EC":(0,4)
 }
 
-def recommend_for_farmer(inputs, crop_name):
+def recommend_for_farmer(inputs: Dict[str, Any], crop_name: str) -> Tuple[List[str], Dict[str, Any]]:
+    """
+    Generate fertilizer recommendations for a farmer based on soil test inputs and crop.
+    N, P, K, pH, EC are mandatory; others are optional.
+    """
     crop = crop_name.lower()
     if crop not in baseline_npk:
         raise ValueError(f"Unsupported crop: {crop}")
@@ -155,7 +198,6 @@ def recommend():
         return jsonify({"error": str(e)}), 400
 
 # ---------------- Run API ---------------- #
-import os
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+
+# Production WSGI entry point: use with Gunicorn or uWSGI
+# Example: gunicorn app:app --bind 0.0.0.0:10000

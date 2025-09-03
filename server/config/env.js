@@ -17,8 +17,8 @@ const config = {
   // Gemini AI Configuration
   gemini: {
     apiKey: process.env.GEMINI_API_KEY || '',
-    model: process.env.GEMINI_MODEL || 'gemini-pro',
-    apiUrl: process.env.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+    model: process.env.GEMINI_MODEL || 'models/gemini-1.0-pro',
+    apiUrl: process.env.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/models/gemini-1.0-pro:generateContent',
   },
 
   // CORS Configuration
