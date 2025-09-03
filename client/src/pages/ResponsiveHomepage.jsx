@@ -7,7 +7,6 @@ import PestCheckPage from "./PestCheckPage.jsx";
 import MarketPricesPage from "./MarketPricesPage.jsx";
 import CropCalendarPage from "./CropCalendarPage.jsx";
 import QuestPage from "./QuestPage.jsx";
-import CommunityPage from "./CommunityPage.jsx";
 import {
   TranslatedText,
   useAutoTranslation,
@@ -43,6 +42,7 @@ import {
   Award,
   Target,
   Users,
+  LogOut,
   Search,
   ArrowRight,
   Sprout,
@@ -65,7 +65,7 @@ import {
 } from "lucide-react";
 
 const ResponsiveHomepage = () => {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, userProfile, isAuthenticated, isLoading: authLoading, signOut } = useAuth();
   const autoTranslation = useAutoTranslation();
   const currentLanguage = autoTranslation?.currentLanguage || "en";
 
@@ -159,14 +159,6 @@ const ResponsiveHomepage = () => {
     },
     {
       id: 6,
-      title: "Community",
-      icon: Users,
-      color: "bg-purple-50 text-purple-600 border-purple-200",
-      requiresAuth: true,
-      guestDescription: "Join the farmer community",
-    },
-    {
-      id: 7,
       title: "Crop Advisory",
       icon: Camera,
       color: "bg-teal-50 text-teal-600 border-teal-200",
@@ -228,7 +220,14 @@ const ResponsiveHomepage = () => {
         console.error("Failed to initialize app:", error);
         // Use fallback data if API fails
         setWeatherData({
-          current: { temp: 28, rain_mm: 0, humidity: 65 },
+          current: { 
+            temp: 28, 
+            rain_mm: 0, 
+            humidity: 65,
+            location: "New Delhi",
+            weather: "Clear",
+            description: "Clear sky"
+          },
           forecast: [
             { d: "Today", t_min: 22, t_max: 32, rain_mm: 0, icon: "sun" },
             { d: "Tomorrow", t_min: 24, t_max: 30, rain_mm: 5, icon: "cloud" },
@@ -246,10 +245,9 @@ const ResponsiveHomepage = () => {
       }
     };
 
-    if (!authLoading) {
-      initializeApp();
-    }
-  }, [authLoading]);
+    // Initialize immediately, don't wait for auth
+    initializeApp();
+  }, []); // Remove authLoading dependency
 
   // Online status monitoring
   useEffect(() => {
@@ -354,10 +352,7 @@ const ResponsiveHomepage = () => {
       case 5: // My Progress
         setCurrentPage("profile");
         break;
-      case 6: // Community
-        setCurrentPage("community");
-        break;
-      case 7: // Crop Advisory
+      case 6: // Crop Advisory
         setShowCropAdvisory(true);
         break;
       default:
@@ -390,14 +385,58 @@ const ResponsiveHomepage = () => {
     setSidebarOpen(false);
   };
 
-  // Loading state
-  if (authLoading || !weatherData) {
+  // Loading state - only show for initial load
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  
+  // Add timeout to prevent infinite loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!initialLoadComplete) {
+        console.log('Forcing app to load after timeout');
+        setInitialLoadComplete(true);
+        // Set fallback weather data if still loading
+        if (!weatherData) {
+          setWeatherData({
+            current: { 
+              temp: 28, 
+              rain_mm: 0, 
+              humidity: 65,
+              location: "New Delhi",
+              weather: "Clear",
+              description: "Clear sky"
+            },
+            forecast: [
+              { d: "Today", t_min: 22, t_max: 32, rain_mm: 0, icon: "sun" },
+              { d: "Tomorrow", t_min: 24, t_max: 30, rain_mm: 5, icon: "cloud" },
+            ],
+            alerts: []
+          });
+        }
+      }
+    }, 5000); // 5 second timeout
+    
+    return () => clearTimeout(timeout);
+  }, [initialLoadComplete, weatherData]);
+
+  // Mark as loaded when we have either auth or weather data
+  useEffect(() => {
+    if (!authLoading && weatherData && !initialLoadComplete) {
+      setInitialLoadComplete(true);
+    }
+  }, [authLoading, weatherData, initialLoadComplete]);
+
+  // Loading state - more lenient conditions
+  if (!initialLoadComplete && (authLoading || !weatherData)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <div className="text-slate-600">
             <TranslatedText>Loading FarmWise...</TranslatedText>
+          </div>
+          <div className="text-xs text-slate-400 mt-2">
+            {!weatherData && "Loading weather data..."}
+            {authLoading && "Checking authentication..."}
           </div>
         </div>
       </div>
@@ -445,15 +484,6 @@ const ResponsiveHomepage = () => {
   if (currentPage === "quest") {
     return (
       <QuestPage
-        onBack={handleBackToHome}
-        currentLanguage={currentLanguage}
-      />
-    );
-  }
-
-  if (currentPage === "community") {
-    return (
-      <CommunityPage
         onBack={handleBackToHome}
         currentLanguage={currentLanguage}
       />
@@ -528,18 +558,6 @@ const ResponsiveHomepage = () => {
                 <TranslatedText>Quests</TranslatedText>
               </button>
               <button
-                onClick={() => {
-                  if (!isAuthenticated) {
-                    setShowAuthModal(true);
-                  } else {
-                    setCurrentPage("community");
-                  }
-                }}
-                className="text-slate-600 hover:text-emerald-600 font-medium transition-colors"
-              >
-                <TranslatedText>Community</TranslatedText>
-              </button>
-              <button
                 onClick={() => setCurrentPage("help")}
                 className="text-slate-600 hover:text-emerald-600 font-medium transition-colors"
               >
@@ -549,21 +567,6 @@ const ResponsiveHomepage = () => {
 
             {/* Right side actions */}
             <div className="flex items-center space-x-4">
-              {/* Online Status */}
-              <div className="hidden sm:flex items-center space-x-2">
-                {isOnline ? (
-                  <div className="flex items-center space-x-1 text-emerald-600">
-                    <Wifi className="w-4 h-4" />
-                    <span className="text-xs">Online</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-1 text-red-500">
-                    <WifiOff className="w-4 h-4" />
-                    <span className="text-xs">Offline</span>
-                  </div>
-                )}
-              </div>
-
               {/* Auth Buttons / User Menu */}
               {isAuthenticated ? (
                 <div className="flex items-center space-x-3">
@@ -573,8 +576,16 @@ const ResponsiveHomepage = () => {
                   >
                     <User className="w-4 h-4" />
                     <span className="hidden sm:inline">
-                      {user?.name || "Profile"}
+                      {userProfile?.username || user?.user_metadata?.name || user?.name || "User"}
                     </span>
+                  </button>
+                  <button
+                    onClick={signOut}
+                    className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-medium transition-colors"
+                    title="Logout"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden sm:inline">Logout</span>
                   </button>
                 </div>
               ) : (
@@ -950,67 +961,7 @@ const ResponsiveHomepage = () => {
               </div>
             )}
 
-            {/* User Progress (Authenticated Users Only) */}
-            {isAuthenticated && (
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">
-                  <TranslatedText>Your Progress</TranslatedText>
-                </h3>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-600">
-                      <TranslatedText>Level</TranslatedText>
-                    </span>
-                    <span className="text-lg font-bold text-emerald-600">
-                      {user?.level || 1}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-600">
-                      <TranslatedText>Points</TranslatedText>
-                    </span>
-                    <span className="text-lg font-bold text-blue-600">
-                      {user?.totalPoints || 0}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-600">
-                      <TranslatedText>Quests</TranslatedText>
-                    </span>
-                    <span className="text-lg font-bold text-purple-600">
-                      {user?.completedQuests || 0}
-                    </span>
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-slate-600">
-                        <TranslatedText>Sustainability Score</TranslatedText>
-                      </span>
-                      <span className="text-lg font-bold text-emerald-600">
-                        {user?.sustainabilityScore || 0}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${user?.sustainabilityScore || 0}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setCurrentPage("profile")}
-                    className="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
-                  >
-                    <TranslatedText>View Full Profile</TranslatedText>
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* Call to Action for Guests */}
             {!isAuthenticated && (

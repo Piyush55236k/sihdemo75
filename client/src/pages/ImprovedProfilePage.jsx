@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { useAuth } from '../components/AuthProvider'
+import { updateUsername, isUsernameAvailable, updateUserProfile } from '../services/userService'
 import { TranslatedText } from '../hooks/useAutoTranslation.jsx'
 import { 
   ArrowLeft,
@@ -25,23 +26,28 @@ import {
 } from 'lucide-react'
 
 const ProfilePage = ({ onBack, currentLanguage, onNavigate }) => {
-  const { user, updateProfile, logout } = useAuth()
+  const { user, userProfile, updateProfile, refreshProfile, logout } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
+  const [isEditingUsername, setIsEditingUsername] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [usernameError, setUsernameError] = useState('')
+  const [usernameSuccess, setUsernameSuccess] = useState('')
   const fileInputRef = useRef(null)
   
   // Form data state
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    phone: user?.phone || '',
-    location: user?.location || '',
-    farmSize: user?.farmSize || '',
-    primaryCrops: user?.primaryCrops || [],
-    experience: user?.experience || '',
-    bio: user?.bio || '',
-    profileImage: user?.profileImage || null
+    name: userProfile?.full_name || user?.name || '',
+    username: userProfile?.username || '',
+    phone: userProfile?.phone || user?.phone || '',
+    location: userProfile?.farm_location || user?.location || '',
+    farmSize: userProfile?.farm_size || user?.farmSize || '',
+    primaryCrops: userProfile?.primary_crops || user?.primaryCrops || [],
+    experience: userProfile?.experience_level || user?.experience || 'beginner',
+    bio: userProfile?.bio || user?.bio || '',
+    profileImage: userProfile?.avatar_url || user?.profileImage || null
   })
 
   const cropOptions = [
@@ -84,6 +90,68 @@ const ProfilePage = ({ onBack, currentLanguage, onNavigate }) => {
     }))
   }
 
+  const handleUsernameChange = (e) => {
+    const newUsername = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+    setFormData(prev => ({ ...prev, username: newUsername }));
+    setUsernameError('');
+    setUsernameSuccess('');
+  };
+
+  const checkUsernameAvailability = async (username) => {
+    if (!username || username.length < 3) {
+      setUsernameError('Username must be at least 3 characters');
+      return false;
+    }
+
+    if (username === userProfile?.username) {
+      return true; // Current username is always available
+    }
+
+    setIsCheckingUsername(true);
+    try {
+      const available = await isUsernameAvailable(username);
+      if (!available) {
+        setUsernameError('Username is already taken');
+        return false;
+      }
+      setUsernameSuccess('Username is available!');
+      return true;
+    } catch (error) {
+      setUsernameError('Error checking username availability');
+      return false;
+    } finally {
+      setIsCheckingUsername(false);
+    }
+  };
+
+  const handleUsernameBlur = () => {
+    if (formData.username) {
+      checkUsernameAvailability(formData.username);
+    }
+  };
+
+  const handleSaveUsername = async () => {
+    if (!formData.username || formData.username === userProfile?.username) {
+      setIsEditingUsername(false);
+      return;
+    }
+
+    const isAvailable = await checkUsernameAvailability(formData.username);
+    if (!isAvailable) return;
+
+    setIsLoading(true);
+    try {
+      await updateUsername(user.id, formData.username);
+      await refreshProfile(); // Refresh the profile data
+      setUsernameSuccess('Username updated successfully!');
+      setIsEditingUsername(false);
+    } catch (error) {
+      setUsernameError(error.message || 'Error updating username');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!formData.name.trim()) {
       setError('कृपया अपना नाम डालें (Please enter your name)')
@@ -95,7 +163,20 @@ const ProfilePage = ({ onBack, currentLanguage, onNavigate }) => {
     setSuccess('')
 
     try {
-      await updateProfile(formData)
+      // Update user profile in Supabase
+      const profileUpdates = {
+        full_name: formData.name,
+        farm_location: formData.location,
+        farm_size: formData.farmSize,
+        primary_crops: formData.primaryCrops,
+        experience_level: formData.experience,
+        bio: formData.bio,
+        avatar_url: formData.profileImage
+      };
+
+      await updateUserProfile(user.id, profileUpdates);
+      await refreshProfile(); // Refresh the profile data
+      
       setSuccess('प्रोफाइल सफलतापूर्वक अपडेट हो गई (Profile updated successfully)')
       setIsEditing(false)
       
@@ -110,19 +191,20 @@ const ProfilePage = ({ onBack, currentLanguage, onNavigate }) => {
 
   const handleCancel = () => {
     setFormData({
-      name: user?.name || '',
-      phone: user?.phone || '',
-      location: user?.location || '',
-      farmSize: user?.farmSize || '',
-      primaryCrops: user?.primaryCrops || [],
-      experience: user?.experience || '',
-      bio: user?.bio || '',
-      profileImage: user?.profileImage || null
-    })
-    setIsEditing(false)
-    setError('')
-    setSuccess('')
-  }
+      name: userProfile?.full_name || user?.name || '',
+      username: userProfile?.username || '',
+      phone: userProfile?.phone || user?.phone || '',
+      location: userProfile?.farm_location || user?.location || '',
+      farmSize: userProfile?.farm_size || user?.farmSize || '',
+      primaryCrops: userProfile?.primary_crops || user?.primaryCrops || [],
+      experience: userProfile?.experience_level || user?.experience || 'beginner',
+      bio: userProfile?.bio || user?.bio || '',
+      profileImage: userProfile?.avatar_url || user?.profileImage || null
+    });
+    setIsEditing(false);
+    setError('');
+    setSuccess('');
+  };
 
   const stats = [
     { 
@@ -283,15 +365,71 @@ const ProfilePage = ({ onBack, currentLanguage, onNavigate }) => {
                   ) : (
                     <div>
                       <h2 className="text-xl lg:text-2xl font-bold text-slate-800">
-                        {user?.name || <TranslatedText>Farmer Name</TranslatedText>}
+                        {userProfile?.full_name || user?.name || <TranslatedText>Farmer Name</TranslatedText>}
                       </h2>
-                      <p className="text-slate-600 flex items-center justify-center sm:justify-start mt-1">
+                      
+                      {/* Username Display */}
+                      <div className="flex items-center justify-center sm:justify-start mt-1">
+                        {isEditingUsername ? (
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-slate-500">@</span>
+                            <input
+                              type="text"
+                              value={formData.username}
+                              onChange={handleUsernameChange}
+                              onBlur={handleUsernameBlur}
+                              placeholder="username"
+                              className="bg-transparent border-b border-emerald-300 focus:border-emerald-500 focus:outline-none px-1"
+                            />
+                            <button 
+                              onClick={handleSaveUsername}
+                              disabled={isLoading || isCheckingUsername}
+                              className="text-green-600 hover:text-green-700"
+                            >
+                              <Save className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setIsEditingUsername(false);
+                                setFormData(prev => ({ ...prev, username: userProfile?.username || '' }));
+                                setUsernameError('');
+                                setUsernameSuccess('');
+                              }}
+                              className="text-gray-600 hover:text-gray-700"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-1">
+                            <span className="text-emerald-600 text-sm">@{userProfile?.username || 'farmer_user'}</span>
+                            <button 
+                              onClick={() => setIsEditingUsername(true)}
+                              className="text-slate-400 hover:text-emerald-600 ml-1"
+                            >
+                              <Edit3 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Username status messages */}
+                      {usernameError && (
+                        <p className="text-red-500 text-xs mt-1">{usernameError}</p>
+                      )}
+                      {usernameSuccess && (
+                        <p className="text-green-500 text-xs mt-1">{usernameSuccess}</p>
+                      )}
+
+                      <p className="text-slate-600 flex items-center justify-center sm:justify-start mt-2">
                         <MapPin className="w-4 h-4 mr-1" />
-                        {user?.location || <TranslatedText>Location not set</TranslatedText>}
+                        {userProfile?.farm_location || user?.location || <TranslatedText>Location not set</TranslatedText>}
                       </p>
-                      <p className="text-slate-500 text-sm mt-2">
+                      <p className="text-slate-500 text-sm mt-1">
                         <TranslatedText>Member since</TranslatedText> {
-                          user?.joinedDate 
+                          userProfile?.created_at 
+                            ? new Date(userProfile.created_at).toLocaleDateString()
+                            : user?.joinedDate 
                             ? new Date(user.joinedDate).toLocaleDateString()
                             : <TranslatedText>Today</TranslatedText>
                         }

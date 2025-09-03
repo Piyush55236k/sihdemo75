@@ -1,38 +1,126 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
+import { createUserProfile, getUserProfile } from "../services/userService";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const getSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-        setIsAuthenticated(!!session?.user);
+        if (!isMounted) return;
+        
+        if (session?.user) {
+          setUser(session.user);
+          setIsAuthenticated(true);
+          // Get or create user profile
+          await loadUserProfile(session.user);
+        } else {
+          setUser(null);
+          setUserProfile(null);
+          setIsAuthenticated(false);
+        }
       } catch (error) {
         console.error('Error getting session:', error);
+        if (isMounted) {
+          setUser(null);
+          setUserProfile(null);
+          setIsAuthenticated(false);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
     
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (isMounted) {
+        console.log('Session loading timeout, setting loading to false');
+        setIsLoading(false);
+      }
+    }, 10000); // 10 second timeout
+    
     getSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setIsAuthenticated(!!session?.user);
-      setIsLoading(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!isMounted) return;
+      
+      try {
+        if (session?.user) {
+          setUser(session.user);
+          setIsAuthenticated(true);
+          // Get or create user profile
+          await loadUserProfile(session.user);
+        } else {
+          setUser(null);
+          setUserProfile(null);
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error('Auth state change error:', error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     });
 
     return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
       subscription?.unsubscribe();
     };
   }, []);
+
+  // Load or create user profile
+  const loadUserProfile = async (user) => {
+    try {
+      // Try to get existing profile
+      let profile = null;
+      try {
+        profile = await getUserProfile(user.id);
+      } catch (error) {
+        console.log('Profile not found or table not set up, creating basic profile...');
+        // If table doesn't exist or has issues, create basic profile from auth user
+        profile = {
+          id: user.id,
+          email: user.email,
+          username: `farmer_${user.email.split('@')[0]}_${Math.random().toString(36).substring(2, 6)}`,
+          full_name: user.user_metadata?.name || user.email.split('@')[0],
+          created_at: new Date().toISOString()
+        };
+        
+        // Try to create in database, but don't fail if it doesn't work
+        try {
+          const dbProfile = await createUserProfile(user);
+          profile = dbProfile;
+        } catch (dbError) {
+          console.log('Database profile creation failed, using local profile:', dbError);
+        }
+      }
+      
+      setUserProfile(profile);
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      // Set basic profile from auth user if everything fails
+      setUserProfile({
+        id: user.id,
+        email: user.email,
+        username: `farmer_${user.email.split('@')[0]}_${Math.random().toString(36).substring(2, 6)}`,
+        full_name: user.user_metadata?.name || user.email.split('@')[0]
+      });
+    }
+  };
 
   // Email/Password sign up
   const signUp = async (email, password, metadata = {}) => {
@@ -159,7 +247,15 @@ export const AuthProvider = ({ children }) => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     setUser(null);
+    setUserProfile(null);
     setIsAuthenticated(false);
+  };
+
+  // Update profile with fresh data from database
+  const refreshProfile = async () => {
+    if (user) {
+      await loadUserProfile(user);
+    }
   };
 
   // Legacy method names for backward compatibility
@@ -172,6 +268,7 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{ 
       user, 
+      userProfile,
       isAuthenticated, 
       isLoading,
       signUp,
@@ -180,6 +277,7 @@ export const AuthProvider = ({ children }) => {
       verifyOtp,
       updateProfile,
       signOut,
+      refreshProfile,
       // Legacy method names
       login,
       logout,
