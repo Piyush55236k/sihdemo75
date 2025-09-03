@@ -580,7 +580,17 @@ const ResponsiveHomepage = () => {
                     </span>
                   </button>
                   <button
-                    onClick={signOut}
+                    onClick={async () => {
+                      try {
+                        console.log('Logout button clicked');
+                        await signOut();
+                        console.log('Logout completed');
+                      } catch (error) {
+                        console.error('Logout failed:', error);
+                        // Still try to clear state even if there's an error
+                        window.location.reload();
+                      }
+                    }}
                     className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-medium transition-colors"
                     title="Logout"
                   >

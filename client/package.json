@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@google-cloud/translate": "^9.2.0",
+    "@supabase/supabase-js": "^2.39.0",
     "framer-motion": "^10.16.4",
     "google-translate-api-x": "^10.7.2",
     "i18next": "^25.4.2",

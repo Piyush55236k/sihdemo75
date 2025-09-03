@@ -244,11 +244,25 @@ export const AuthProvider = ({ children }) => {
 
   // Sign out
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    setUser(null);
-    setUserProfile(null);
-    setIsAuthenticated(false);
+    try {
+      console.log('Attempting to sign out...');
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Supabase signOut error:', error);
+        throw error;
+      }
+      console.log('Successfully signed out from Supabase');
+      setUser(null);
+      setUserProfile(null);
+      setIsAuthenticated(false);
+      console.log('User state cleared');
+    } catch (err) {
+      console.error('SignOut error:', err);
+      // Even if Supabase fails, clear local state
+      setUser(null);
+      setUserProfile(null);
+      setIsAuthenticated(false);
+    }
   };
 
   // Update profile with fresh data from database
