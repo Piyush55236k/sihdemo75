@@ -49,19 +49,25 @@ def recommend_for_farmer(inputs, crop_name):
     if crop not in baseline_npk:
         raise ValueError(f"Unsupported crop: {crop}")
 
-    # Interpret all 12 parameters
+    # Mandatory inputs
+    missing = [k for k in ["N", "P", "K", "pH", "EC"] if inputs.get(k) is None]
+    if missing:
+        raise ValueError(f"Missing mandatory input(s): {', '.join(missing)}")
+
     N = interpret(inputs.get("N"), *ref_thresholds["N"])
     P = interpret(inputs.get("P"), *ref_thresholds["P"])
     K = interpret(inputs.get("K"), *ref_thresholds["K"])
-    S = interpret(inputs.get("S"), *ref_thresholds["S"])
-    Zn = interpret(inputs.get("Zn"), *ref_thresholds["Zn"])
-    Fe = interpret(inputs.get("Fe"), *ref_thresholds["Fe"])
-    Cu = interpret(inputs.get("Cu"), *ref_thresholds["Cu"])
-    Mn = interpret(inputs.get("Mn"), *ref_thresholds["Mn"])
-    B = interpret(inputs.get("B"), *ref_thresholds["B"])
-    OC = interpret(inputs.get("OC"), *ref_thresholds["OC"])
     pH = interpret(inputs.get("pH"), *ref_thresholds["pH"])
     EC = interpret(inputs.get("EC"), *ref_thresholds["EC"])
+
+    # Optional inputs
+    S = interpret(inputs.get("S"), *ref_thresholds["S"]) if inputs.get("S") is not None else None
+    Zn = interpret(inputs.get("Zn"), *ref_thresholds["Zn"]) if inputs.get("Zn") is not None else None
+    Fe = interpret(inputs.get("Fe"), *ref_thresholds["Fe"]) if inputs.get("Fe") is not None else None
+    Cu = interpret(inputs.get("Cu"), *ref_thresholds["Cu"]) if inputs.get("Cu") is not None else None
+    Mn = interpret(inputs.get("Mn"), *ref_thresholds["Mn"]) if inputs.get("Mn") is not None else None
+    B = interpret(inputs.get("B"), *ref_thresholds["B"]) if inputs.get("B") is not None else None
+    OC = interpret(inputs.get("OC"), *ref_thresholds["OC"]) if inputs.get("OC") is not None else None
 
     base_N, base_P2O5, base_K2O = baseline_npk[crop]
 
@@ -70,9 +76,9 @@ def recommend_for_farmer(inputs, crop_name):
     need_P2O5 = max(0.0, base_P2O5 - (P if P else 0))
     need_K2O = max(0.0, base_K2O - (K if K else 0))
 
-    if OC and OC < ref_thresholds["OC"][0]:
+    if OC is not None and OC < ref_thresholds["OC"][0]:
         need_N *= 1.1
-    if EC and EC > 4:
+    if EC is not None and EC > 4:
         need_N *= 0.8; need_P2O5 *= 0.8; need_K2O *= 0.8
 
     fert_plan = {}
@@ -97,39 +103,39 @@ def recommend_for_farmer(inputs, crop_name):
         fert_plan["MOP_kg/ha"] = mop_needed
         messages.append(f"Apply {mop_needed} kg/ha MOP because potassium is below recommended level for {crop_name}.")
 
-    if S and S < ref_thresholds["S"][0]:
+    if S is not None and S < ref_thresholds["S"][0]:
         gypsum_needed = round_up((ref_thresholds["S"][0] - S) / FERT_N_CONTENT["gypsum"]["S"])
         fert_plan["Gypsum_kg/ha"] = gypsum_needed
         messages.append(f"Apply {gypsum_needed} kg/ha Gypsum because soil sulphur is low for {crop_name}.")
 
-    if Zn and Zn < ref_thresholds["Zn"][0]:
+    if Zn is not None and Zn < ref_thresholds["Zn"][0]:
         zn_needed = round_up((ref_thresholds["Zn"][0] - Zn) / FERT_N_CONTENT["znso4"]["Zn"])
         fert_plan["ZnSO4_kg/ha"] = zn_needed
         messages.append(f"Apply {zn_needed} kg/ha Zinc Sulfate because soil zinc is below recommended levels.")
 
-    if B and B < ref_thresholds["B"][0]:
+    if B is not None and B < ref_thresholds["B"][0]:
         borax_needed = round_up((ref_thresholds["B"][0] - B) / FERT_N_CONTENT["borax"]["B"])
         fert_plan["Borax_kg/ha"] = borax_needed
         messages.append(f"Apply {borax_needed} kg/ha Borax because soil boron is below recommended levels.")
 
-    if OC and OC < ref_thresholds["OC"][0]:
+    if OC is not None and OC < ref_thresholds["OC"][0]:
         compost_needed = round_up((ref_thresholds["OC"][0] - OC) / FERT_N_CONTENT["compost"]["OC"])
         fert_plan["Compost_kg/ha"] = compost_needed * 1000
         messages.append(f"Apply approx {compost_needed} tons/ha Compost/FYM to improve soil organic matter.")
 
-    if Fe and Fe < ref_thresholds["Fe"][0]:
+    if Fe is not None and Fe < ref_thresholds["Fe"][0]:
         messages.append("Iron low: consider foliar Fe spray because soil Fe is insufficient.")
-    if Cu and Cu < ref_thresholds["Cu"][0]:
+    if Cu is not None and Cu < ref_thresholds["Cu"][0]:
         messages.append("Copper low: consider foliar Cu spray because soil Cu is insufficient.")
-    if Mn and Mn < ref_thresholds["Mn"][0]:
+    if Mn is not None and Mn < ref_thresholds["Mn"][0]:
         messages.append("Manganese low: consider foliar Mn spray because soil Mn is insufficient.")
 
-    if pH and pH < 6.0:
+    if pH is not None and pH < 6.0:
         messages.append("Soil acidic: apply lime to raise pH.")
-    elif pH and pH > 8.5:
+    elif pH is not None and pH > 8.5:
         messages.append("Soil alkaline: apply gypsum or acidifying measures to lower pH.")
 
-    if EC and EC > 4:
+    if EC is not None and EC > 4:
         messages.append("High salinity: grow salt-tolerant crops and improve irrigation.")
 
     return messages, fert_plan

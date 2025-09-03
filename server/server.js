@@ -5,9 +5,11 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 require('dotenv').config();
 
+
 // Import routes
 const chatRoutes = require('./routes/chat');
 const feedbackRoutes = require('./routes/feedback');
+const geminiRoutes = require('./routes/gemini');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -94,6 +96,7 @@ app.get('/health', (req, res) => {
 app.use('/api', chatLimiter);
 app.use('/api', chatRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/gemini', geminiRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

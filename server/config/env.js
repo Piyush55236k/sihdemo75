@@ -14,6 +14,13 @@ const config = {
     url: process.env.CLIENT_URL || 'http://localhost:5173',
   },
 
+  // Gemini AI Configuration
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY || '',
+    model: process.env.GEMINI_MODEL || 'gemini-pro',
+    apiUrl: process.env.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+  },
+
   // CORS Configuration
   cors: {
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
