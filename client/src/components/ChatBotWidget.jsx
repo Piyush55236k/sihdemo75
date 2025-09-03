@@ -32,6 +32,19 @@ const ChatBotWidget = () => {
     setIsFeedbackOpen(!isFeedbackOpen);
   };
 
+  const handleAuthSuccess = () => {
+    // Close auth modals and open the requested feature
+    setShowChatAuth(false);
+    setShowFeedbackAuth(false);
+    // Auto-open chat if that's what was requested
+    if (showChatAuth) {
+      setIsChatOpen(true);
+    }
+    if (showFeedbackAuth) {
+      setIsFeedbackOpen(true);
+    }
+  };
+
   return (
     <>
       {/* Floating Action Buttons */}
@@ -86,7 +99,11 @@ const ChatBotWidget = () => {
 
       {/* Authentication Guards */}
       {showChatAuth && (
-        <AuthGuard feature="chat" onClose={() => setShowChatAuth(false)}>
+        <AuthGuard 
+          feature="chat" 
+          onClose={() => setShowChatAuth(false)}
+          onAuthSuccess={handleAuthSuccess}
+        >
           <div />
         </AuthGuard>
       )}
@@ -95,10 +112,14 @@ const ChatBotWidget = () => {
         <AuthGuard
           feature="feedback"
           onClose={() => setShowFeedbackAuth(false)}
+          onAuthSuccess={handleAuthSuccess}
         >
           <div />
         </AuthGuard>
       )}
+
+      {/* Chat Interface - Always render if open, ChatBot handles auth internally */}
+      <ChatBot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
       {/* Feedback Form - Only render if authenticated and open */}
       {isAuthenticated && (
@@ -106,11 +127,6 @@ const ChatBotWidget = () => {
           isOpen={isFeedbackOpen}
           onClose={() => setIsFeedbackOpen(false)}
         />
-      )}
-
-      {/* Chat Interface - Only render if authenticated and open */}
-      {isAuthenticated && (
-        <ChatBot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
       )}
     </>
   );

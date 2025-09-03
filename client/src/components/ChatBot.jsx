@@ -258,34 +258,7 @@ const ChatBot = ({ isOpen, onClose }) => {
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div
-        className={`fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
-          <Bot className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">
-            {language === "hi" ? "लॉगिन की आवश्यकता" : "Login Required"}
-          </h3>
-          <p className="text-gray-600 mb-6">
-            {language === "hi"
-              ? "चैटबॉट का उपयोग करने के लिए कृपया लॉगिन करें।"
-              : "Please login to use the chatbot feature."}
-          </p>
-          <button
-            onClick={onClose}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition-colors"
-          >
-            {language === "hi" ? "बंद करें" : "Close"}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+  // Only render if the modal is open
   if (!isOpen) return null;
 
   return (
