@@ -11,6 +11,8 @@ const SoilFertilizerPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Mandatory fields
+  const requiredFields = ['N', 'P', 'K', 'pH', 'OC'];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -22,6 +24,14 @@ const SoilFertilizerPage = () => {
     setLoading(true);
     setError(null);
     setRecommendation(null);
+    // Validate required fields
+    for (const field of requiredFields) {
+      if (!inputs[field] || inputs[field].trim() === '') {
+        setError('Please fill in all mandatory fields: N, P, K, pH, OC.');
+        setLoading(false);
+        return;
+      }
+    }
     try {
       const res = await fetch('https://sihdemo75.onrender.com/recommend', {
         method: 'POST',
@@ -57,20 +67,44 @@ const SoilFertilizerPage = () => {
               <option value="mustard">Mustard</option>
             </select>
           </div>
-          {Object.keys(inputs).map((key) => (
-            <div key={key}>
-              <label className="block font-semibold mb-1" htmlFor={key}>{key}</label>
-              <input
-                type="text"
-                name={key}
-                id={key}
-                value={inputs[key]}
-                onChange={handleInputChange}
-                className="w-full border rounded p-2"
-                placeholder={`Enter ${key}`}
-              />
-            </div>
-          ))}
+          {/* Required fields in a row */}
+          <div className="flex flex-wrap gap-4 mb-4">
+            {requiredFields.map((key) => (
+              <div key={key} className="flex-1 min-w-[120px]">
+                <label className="block font-semibold mb-1" htmlFor={key}>
+                  {key}
+                  <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="text"
+                  name={key}
+                  id={key}
+                  value={inputs[key]}
+                  onChange={handleInputChange}
+                  className="w-full border rounded p-2 border-red-400"
+                  placeholder={`Enter ${key} (required)`}
+                  required
+                />
+              </div>
+            ))}
+          </div>
+          {/* Optional fields in a row */}
+          <div className="flex flex-wrap gap-4 mb-4">
+            {Object.keys(inputs).filter(key => !requiredFields.includes(key)).map((key) => (
+              <div key={key} className="flex-1 min-w-[120px]">
+                <label className="block font-semibold mb-1" htmlFor={key}>{key}</label>
+                <input
+                  type="text"
+                  name={key}
+                  id={key}
+                  value={inputs[key]}
+                  onChange={handleInputChange}
+                  className="w-full border rounded p-2"
+                  placeholder={`Enter ${key} (optional)`}
+                />
+              </div>
+            ))}
+          </div>
           <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded font-semibold" disabled={loading}>
             {loading ? 'Loading...' : 'Get Recommendation'}
           </button>
