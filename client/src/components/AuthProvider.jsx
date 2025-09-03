@@ -242,27 +242,66 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  // Sign out
-  const signOut = async () => {
+  // Alternative simple logout method for emergency use
+  const forceLogout = () => {
+    console.log('AuthProvider: Force logout initiated');
+    setUser(null);
+    setUserProfile(null);
+    setIsAuthenticated(false);
+    
+    // Clear all storage
     try {
-      console.log('Attempting to sign out...');
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Supabase signOut error:', error);
-        throw error;
-      }
-      console.log('Successfully signed out from Supabase');
-      setUser(null);
-      setUserProfile(null);
-      setIsAuthenticated(false);
-      console.log('User state cleared');
-    } catch (err) {
-      console.error('SignOut error:', err);
-      // Even if Supabase fails, clear local state
-      setUser(null);
-      setUserProfile(null);
-      setIsAuthenticated(false);
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      console.warn('Storage clear failed:', e);
     }
+    
+    // Force page reload to ensure clean state
+    window.location.reload();
+  };
+
+  // Sign out with timeout and fallback
+  const signOut = async () => {
+    console.log('AuthProvider: Attempting to sign out...');
+    console.log('AuthProvider: Current user before logout:', user?.id);
+    console.log('AuthProvider: Current auth state before logout:', isAuthenticated);
+    
+    // Always clear local state first
+    console.log('AuthProvider: Clearing local state immediately...');
+    setUser(null);
+    setUserProfile(null);
+    setIsAuthenticated(false);
+    
+    // Clear storage immediately
+    try {
+      console.log('AuthProvider: Clearing storage...');
+      localStorage.clear();
+      sessionStorage.clear();
+      console.log('AuthProvider: Storage cleared successfully');
+    } catch (storageError) {
+      console.warn('AuthProvider: Error clearing storage:', storageError);
+    }
+    
+    // Try to call Supabase signOut in the background, but don't wait for it
+    try {
+      console.log('AuthProvider: Calling supabase.auth.signOut() in background...');
+      
+      // Don't await this - let it run in the background
+      supabase.auth.signOut().then((result) => {
+        console.log('AuthProvider: Background signOut completed:', result);
+      }).catch((error) => {
+        console.warn('AuthProvider: Background signOut error (ignored):', error);
+      });
+      
+      console.log('AuthProvider: Local logout completed successfully');
+      
+    } catch (err) {
+      console.warn('AuthProvider: SignOut background call failed (ignored):', err);
+    }
+    
+    console.log('AuthProvider: User state cleared');
+    console.log('AuthProvider: Final auth state:', { user: null, isAuthenticated: false });
   };
 
   // Update profile with fresh data from database
@@ -291,6 +330,7 @@ export const AuthProvider = ({ children }) => {
       verifyOtp,
       updateProfile,
       signOut,
+      forceLogout,
       refreshProfile,
       // Legacy method names
       login,

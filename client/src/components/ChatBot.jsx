@@ -190,7 +190,17 @@ const ChatBot = ({ isOpen, onClose }) => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        
+        // Handle different error types
+        if (response.status === 429) {
+          throw new Error('API quota exceeded. Please try again later or check your OpenAI billing.');
+        } else if (response.status === 401) {
+          throw new Error('Invalid API key. Please check your OpenAI configuration.');
+        } else if (response.status === 503) {
+          throw new Error('OpenAI service is temporarily unavailable. Please try again later.');
+        } else {
+          throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        }
       }
 
       const data = await response.json();
@@ -212,13 +222,25 @@ const ChatBot = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error("Chat error:", error);
 
+      let errorContent = "Sorry, something went wrong. Please try again.";
+      let errorContentHi = "क्षमा करें, कुछ गलत हो गया। कृपया पुनः प्रयास करें।";
+
+      // Handle specific error types with helpful messages
+      if (error.message.includes('quota exceeded')) {
+        errorContent = '🚫 Sorry, the AI service is currently at capacity. Here are some general farming tips:\n\n• Water your crops early morning or evening\n• Monitor soil moisture regularly\n• Use organic compost for better soil health\n• Practice crop rotation to prevent diseases\n\nPlease try the AI assistant again later!';
+        errorContentHi = '🚫 क्षमा करें, AI सेवा अभी भरी हुई है। कुछ सामान्य खेती की सुझाव:\n\n• सुबह या शाम को फसलों को पानी दें\n• मिट्टी की नमी की नियमित जांच करें\n• बेहतर मिट्टी स्वास्थ्य के लिए जैविक खाद का उपयोग करें\n• बीमारियों से बचने के लिए फसल चक्र अपनाएं\n\nकृपया AI सहायक को बाद में फिर से आजमाएं!';
+      } else if (error.message.includes('Invalid API key')) {
+        errorContent = '⚠️ The AI service is temporarily unavailable. Please contact support if this continues.';
+        errorContentHi = '⚠️ AI सेवा अस्थायी रूप से उपलब्ध नहीं है। यदि यह जारी रहे तो सहायता से संपर्क करें।';
+      } else if (error.message.includes('temporarily unavailable')) {
+        errorContent = '⏳ The AI service is temporarily busy. Please try again in a few minutes.';
+        errorContentHi = '⏳ AI सेवा अस्थायी रूप से व्यस्त है। कुछ मिनटों में फिर से कोशिश करें।';
+      }
+
       const errorMessage = {
         id: Date.now() + 1,
         type: "assistant",
-        content:
-          language === "hi"
-            ? "क्षमा करें, कुछ गलत हो गया। कृपया पुनः प्रयास करें।"
-            : "Sorry, something went wrong. Please try again.",
+        content: language === "hi" ? errorContentHi : errorContent,
         timestamp: new Date(),
       };
 

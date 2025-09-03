@@ -580,14 +580,41 @@ const ResponsiveHomepage = () => {
                     </span>
                   </button>
                   <button
-                    onClick={async () => {
+                    onClick={async (event) => {
+                      console.log('Logout button clicked');
+                      console.log('Current user:', user);
+                      console.log('Current isAuthenticated:', isAuthenticated);
+                      
+                      // Show immediate feedback to user
+                      const button = event.target.closest('button');
+                      const originalHTML = button.innerHTML;
+                      button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div><span>Signing out...</span>';
+                      button.disabled = true;
+                      
                       try {
-                        console.log('Logout button clicked');
+                        console.log('Starting logout process...');
                         await signOut();
-                        console.log('Logout completed');
+                        console.log('Logout completed successfully');
+                        
+                        // Small delay to show success
+                        button.innerHTML = '<span>✓ Signed out!</span>';
+                        
+                        // The UI should update automatically since we cleared the auth state
+                        setTimeout(() => {
+                          // If somehow still authenticated, force reload
+                          if (isAuthenticated || user) {
+                            console.log('Still authenticated after logout, forcing reload');
+                            window.location.reload();
+                          }
+                        }, 500);
+                        
                       } catch (error) {
                         console.error('Logout failed:', error);
-                        // Still try to clear state even if there's an error
+                        console.log('Attempting forced logout...');
+                        
+                        // Force clear and reload
+                        localStorage.clear();
+                        sessionStorage.clear();
                         window.location.reload();
                       }
                     }}
