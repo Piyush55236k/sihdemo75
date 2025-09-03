@@ -24,56 +24,22 @@ const CropAdvisory = ({ isOpen, onClose }) => {
   const { user, isAuthenticated } = useAuth();
 
   // State management
-  const [selectedImage, setSelectedImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentAdvisory, setCurrentAdvisory] = useState(null);
   const [language, setLanguage] = useState(config.language.default);
   const [showResults, setShowResults] = useState(false);
 
-  // Refs
-  const imageInputRef = useRef(null);
-
   if (!isOpen) return null;
 
-  const handleImageSelect = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const validation = cropAdvisoryService.validateSoilImage(file);
-      if (validation.valid) {
-        setSelectedImage(file);
-      } else {
-        alert(validation.error);
-      }
-    }
-  };
-
-  const handleImageCapture = () => {
-    imageInputRef.current?.click();
-  };
+  // Removed image upload and camera logic
 
   const processCropAdvisory = async () => {
-    if (!selectedImage) {
-      alert(
-        language === "hi"
-          ? "कृपया पहले मिट्टी की तस्वीर अपलोड करें"
-          : "Please upload a soil image first"
-      );
-      return;
-    }
-
     setIsAnalyzing(true);
-
     try {
       // Get user location
       const location = await weatherService.getCurrentLocation();
-
-      // Get comprehensive crop advisory
-      const advisory = await cropAdvisoryService.getCropAdvisory(
-        selectedImage,
-        location,
-        { language }
-      );
-
+      // Get comprehensive crop advisory (no image)
+      const advisory = await cropAdvisoryService.getCropAdvisory(null, location, { language });
       setCurrentAdvisory(advisory);
       setShowResults(true);
     } catch (error) {
@@ -89,7 +55,6 @@ const CropAdvisory = ({ isOpen, onClose }) => {
   };
 
   const handleClose = () => {
-    setSelectedImage(null);
     setCurrentAdvisory(null);
     setShowResults(false);
     setIsAnalyzing(false);
@@ -97,7 +62,6 @@ const CropAdvisory = ({ isOpen, onClose }) => {
   };
 
   const resetAnalysis = () => {
-    setSelectedImage(null);
     setCurrentAdvisory(null);
     setShowResults(false);
   };
@@ -153,65 +117,19 @@ const CropAdvisory = ({ isOpen, onClose }) => {
 
         <div className="p-6">
           {!showResults ? (
-            /* Upload Interface */
+            /* Advisory Interface (no image/camera) */
             <div className="space-y-6">
               <div className="text-center">
                 <p className="text-gray-600 text-lg mb-2">
                   {language === "hi"
-                    ? "मिट्टी की तस्वीर अपलोड करें और AI-powered फसल सुझाव प्राप्त करें"
-                    : "Upload a soil image to get AI-powered crop recommendations"}
+                    ? "AI-powered फसल सुझाव प्राप्त करें"
+                    : "Get AI-powered crop recommendations"}
                 </p>
                 <p className="text-sm text-gray-500">
                   {language === "hi"
                     ? "मौसम डेटा और स्थान आधारित विश्लेषण के साथ"
                     : "With weather data and location-based analysis"}
                 </p>
-              </div>
-
-              {/* Image Preview */}
-              {selectedImage && (
-                <div className="relative">
-                  <img
-                    src={URL.createObjectURL(selectedImage)}
-                    alt="Selected soil"
-                    className="w-full h-64 object-cover rounded-xl border-2 border-green-200"
-                  />
-                  <button
-                    onClick={() => setSelectedImage(null)}
-                    className="absolute top-3 right-3 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors shadow-lg"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-
-              {/* Upload Options */}
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={handleImageCapture}
-                  className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 group"
-                >
-                  <Camera className="w-12 h-12 text-gray-400 mb-3 group-hover:text-blue-500" />
-                  <span className="text-lg font-medium text-gray-600 group-hover:text-blue-600">
-                    {language === "hi" ? "कैमरा" : "Camera"}
-                  </span>
-                  <span className="text-sm text-gray-400">
-                    {language === "hi" ? "फोटो लें" : "Take Photo"}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => imageInputRef.current?.click()}
-                  className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-green-400 hover:bg-green-50 transition-all duration-200 group"
-                >
-                  <Upload className="w-12 h-12 text-gray-400 mb-3 group-hover:text-green-500" />
-                  <span className="text-lg font-medium text-gray-600 group-hover:text-green-600">
-                    {language === "hi" ? "गैलरी" : "Gallery"}
-                  </span>
-                  <span className="text-sm text-gray-400">
-                    {language === "hi" ? "अपलोड करें" : "Upload"}
-                  </span>
-                </button>
               </div>
 
               {/* Features Info */}

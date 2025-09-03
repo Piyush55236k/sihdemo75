@@ -720,7 +720,7 @@ const ResponsiveHomepage = () => {
                 {!isAuthenticated && (
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                     <div className="flex items-start space-x-3">
-                      <Shield className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      {/* Removed Shield icon */}
                       <div>
                         <h3 className="font-medium text-amber-800">
                           <TranslatedText>
