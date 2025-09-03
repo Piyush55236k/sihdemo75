@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../components/AuthProvider";
 import AuthModal from "../components/AuthModal";
-import CropAdvisory from "../components/CropAdvisory";
+import CropAdvisoryDemoPage from "./CropAdvisoryDemoPage";
 import ImprovedProfilePage from "./ImprovedProfilePage";
 import PestCheckPage from "./PestCheckPage.jsx";
 import MarketPricesPage from "./MarketPricesPage.jsx";
@@ -1134,10 +1134,20 @@ const ResponsiveHomepage = () => {
       )}
 
       {/* Crop Advisory Modal */}
-      <CropAdvisory
-        isOpen={showCropAdvisory}
-        onClose={() => setShowCropAdvisory(false)}
-      />
+      {showCropAdvisory && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="relative w-full max-w-2xl mx-auto">
+            <button
+              onClick={() => setShowCropAdvisory(false)}
+              className="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow hover:bg-gray-100"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <CropAdvisoryDemoPage />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
