@@ -32,7 +32,6 @@ const AuthGuard = ({ children, feature = "feature", onClose }) => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 text-center">
           {/* Icon */}
-          {/* Icon */}
           <div className="mb-6">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
               <Lock className="w-8 h-8 text-emerald-600" />
@@ -117,18 +116,6 @@ const AuthGuard = ({ children, feature = "feature", onClose }) => {
               <TranslatedText text="Maybe Later" />
             </button>
           </div>
-
-          {/* Close Button */}
-          <button
-            onClick={() => {
-              if (onClose) {
-                onClose();
-              }
-            }}
-            className="w-full text-gray-500 hover:text-gray-700 font-medium py-2 transition-colors duration-200"
-          >
-            <TranslatedText text="Maybe Later" />
-          </button>
         </div>
       </div>
 

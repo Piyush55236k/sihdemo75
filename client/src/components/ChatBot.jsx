@@ -158,40 +158,56 @@ const ChatBot = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${config.api.baseURL}/api/chat`, {
-        method: "POST",
+      // Use OpenAI API directly
+      const openaiApiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      const openaiModel = import.meta.env.VITE_OPENAI_MODEL || 'gpt-3.5-turbo';
+      
+      if (!openaiApiKey) {
+        throw new Error('OpenAI API key not configured');
+      }
+
+      // Create system prompt for farming assistant
+      const systemPrompt = language === 'hi' 
+        ? "आप एक कृषि विशेषज्ञ हैं। किसानों को फसल, मिट्टी, मौसम और कृषि तकनीकों के बारे में हिंदी में सहायता प्रदान करें। संक्षिप्त और उपयोगी सलाह दें।"
+        : "You are a farming expert assistant. Help farmers with advice about crops, soil, weather, and farming techniques. Provide concise and helpful advice.";
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`,
         },
         body: JSON.stringify({
-          message: inputMessage,
-          language,
-          userId: user?.id,
-          sessionId: `chat_${Date.now()}`,
+          model: openaiModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: inputMessage }
+          ],
+          max_tokens: parseInt(import.meta.env.VITE_OPENAI_MAX_TOKENS) || 150,
+          temperature: parseFloat(import.meta.env.VITE_OPENAI_TEMPERATURE) || 0.7,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
+      const assistantResponse = data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';
 
       const assistantMessage = {
         id: Date.now() + 1,
         type: "assistant",
-        content: data.response || data.message,
+        content: assistantResponse,
         timestamp: new Date(),
-        confidence: data.confidence,
-        sources: data.sources,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
 
       // Text-to-speech for assistant response
-      if (speechEnabled && data.response) {
-        speakMessage(data.response, language);
+      if (speechEnabled && assistantResponse) {
+        speakMessage(assistantResponse, language);
       }
     } catch (error) {
       console.error("Chat error:", error);

@@ -179,48 +179,70 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
+        {/* Header with Farming Theme */}
+        <div className="relative bg-gradient-to-br from-emerald-50 to-teal-50 p-6 rounded-t-3xl border-b border-emerald-100">
           {step === 'otp' ? (
             <button
               onClick={() => setStep('auth')}
-              className="p-2 hover:bg-gray-100 rounded-full -ml-2"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 hover:bg-white/50 rounded-full transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 text-emerald-600" />
             </button>
           ) : step === 'profile' ? (
             <button
               onClick={() => authMethod === 'email' ? setStep('auth') : setStep('otp')}
-              className="p-2 hover:bg-gray-100 rounded-full -ml-2"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 hover:bg-white/50 rounded-full transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 text-emerald-600" />
             </button>
           ) : (
-            <div className="w-9" />
+            <button
+              onClick={onClose}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 hover:bg-white/50 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           )}
           
-          <h2 className="text-xl font-semibold text-gray-900">
-            {step === 'auth' ? (
-              mode === 'login' ? <TranslatedText>Sign In</TranslatedText> : <TranslatedText>Create Account</TranslatedText>
-            ) : step === 'otp' ? (
-              <TranslatedText>Verify Phone</TranslatedText>
-            ) : step === 'profile' ? (
-              <TranslatedText>Complete Profile</TranslatedText>
-            ) : (
-              <TranslatedText>Check Your Email</TranslatedText>
-            )}
-          </h2>
-          
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full -mr-2"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="text-center">
+            {/* Farming Icon */}
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              🌾
+            </div>
+            
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {step === 'otp' ? (
+                <TranslatedText>Verify Your Phone</TranslatedText>
+              ) : step === 'profile' ? (
+                <TranslatedText>Complete Your Profile</TranslatedText>
+              ) : step === 'emailSent' ? (
+                <TranslatedText>Check Your Email</TranslatedText>
+              ) : mode === 'login' ? (
+                <TranslatedText>Welcome Back!</TranslatedText>
+              ) : (
+                <TranslatedText>Join FarmWise</TranslatedText>
+              )}
+            </h1>
+            
+            <p className="text-sm text-gray-600">
+              {step === 'otp' ? (
+                <TranslatedText>Enter the 6-digit code sent to your phone</TranslatedText>
+              ) : step === 'profile' ? (
+                <TranslatedText>Help us personalize your farming experience</TranslatedText>
+              ) : step === 'emailSent' ? (
+                <TranslatedText>We've sent a verification link to your email</TranslatedText>
+              ) : mode === 'login' ? (
+                <TranslatedText>Sign in to access your farming dashboard</TranslatedText>
+              ) : (
+                <TranslatedText>Start your smart farming journey today</TranslatedText>
+              )}
+            </p>
+          </div>
         </div>
 
+        {/* Content */}
         <div className="p-6">
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-2">
@@ -275,71 +297,97 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
           {/* Authentication Step */}
           {step === 'auth' && (
             <div className="space-y-6">
-              {/* Auth Method Toggle */}
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setAuthMethod('email')}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                    authMethod === 'email'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <Mail className="w-4 h-4 inline mr-2" />
-                  <TranslatedText>Email</TranslatedText>
-                </button>
-                <button
-                  onClick={() => setAuthMethod('phone')}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                    authMethod === 'phone'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <Phone className="w-4 h-4 inline mr-2" />
-                  <TranslatedText>Phone</TranslatedText>
-                </button>
+              {/* Benefits Section */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="text-center p-4 bg-emerald-50 rounded-xl">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    🌱
+                  </div>
+                  <p className="text-xs text-emerald-700 font-medium">
+                    <TranslatedText>Smart Crop Advice</TranslatedText>
+                  </p>
+                </div>
+                <div className="text-center p-4 bg-blue-50 rounded-xl">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    🌦️
+                  </div>
+                  <p className="text-xs text-blue-700 font-medium">
+                    <TranslatedText>Weather Alerts</TranslatedText>
+                  </p>
+                </div>
+              </div>
+
+              {/* Auth Method Toggle - Modern Design */}
+              <div className="bg-gray-50 rounded-2xl p-1.5 border border-gray-200">
+                <div className="grid grid-cols-2 gap-1">
+                  <button
+                    onClick={() => setAuthMethod('email')}
+                    className={`relative py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                      authMethod === 'email'
+                        ? 'bg-white text-emerald-600 shadow-sm border border-emerald-100'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    <Mail className="w-4 h-4 inline mr-2" />
+                    <TranslatedText>Email</TranslatedText>
+                  </button>
+                  <button
+                    onClick={() => setAuthMethod('phone')}
+                    className={`relative py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                      authMethod === 'phone'
+                        ? 'bg-white text-emerald-600 shadow-sm border border-emerald-100'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    <Phone className="w-4 h-4 inline mr-2" />
+                    <TranslatedText>Phone</TranslatedText>
+                  </button>
+                </div>
               </div>
 
               {/* Email Authentication Form */}
               {authMethod === 'email' && (
-                <form onSubmit={handleEmailAuth} className="space-y-4">
+                <form onSubmit={handleEmailAuth} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       <TranslatedText>Email Address</TranslatedText>
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                        <Mail className="w-5 h-5 text-gray-400" />
+                      </div>
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        placeholder="farmer@example.com"
+                        className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder-gray-500"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       <TranslatedText>Password</TranslatedText>
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                        <Lock className="w-5 h-5 text-gray-400" />
+                      </div>
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
-                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        className="w-full pl-12 pr-14 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder-gray-500"
                         required
                         minLength={6}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors duration-200"
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -369,17 +417,23 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+                    className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-emerald-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
                     {isLoading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                        <TranslatedText>{mode === 'login' ? 'Signing In...' : 'Creating Account...'}</TranslatedText>
+                      </div>
                     ) : (
-                      <>
+                      <div className="flex items-center justify-center space-x-2">
                         <span>
-                          {mode === 'login' ? <TranslatedText>Sign In</TranslatedText> : <TranslatedText>Create Account</TranslatedText>}
+                          {mode === 'login' ? 
+                            <TranslatedText>🚀 Access Your Farm</TranslatedText> : 
+                            <TranslatedText>🌱 Start Growing Smart</TranslatedText>
+                          }
                         </span>
                         <ChevronRight className="w-5 h-5" />
-                      </>
+                      </div>
                     )}
                   </button>
                 </form>
@@ -387,27 +441,28 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
               {/* Phone Authentication Form */}
               {authMethod === 'phone' && (
-                <form onSubmit={handlePhoneAuth} className="space-y-4">
+                <form onSubmit={handlePhoneAuth} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       <TranslatedText>Phone Number</TranslatedText>
                     </label>
                     <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center space-x-2">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center space-x-2">
                         <Phone className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-600">+91</span>
+                        <span className="text-gray-600 font-medium">+91</span>
                       </div>
                       <input
                         type="tel"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').substring(0, 10))}
-                        placeholder="Enter 10-digit number"
-                        className="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        placeholder="98765 43210"
+                        className="w-full pl-20 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder-gray-500"
                         maxLength="10"
                         required
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-gray-500 mt-2 flex items-center">
+                      <span className="mr-1">📱</span>
                       <TranslatedText>We'll send you a verification code via SMS</TranslatedText>
                     </p>
                   </div>
@@ -415,22 +470,25 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                   <button
                     type="submit"
                     disabled={isLoading || phoneNumber.length !== 10}
-                    className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+                    className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-emerald-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
                     {isLoading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                        <TranslatedText>Sending Code...</TranslatedText>
+                      </div>
                     ) : (
-                      <>
-                        <span><TranslatedText>Send OTP</TranslatedText></span>
+                      <div className="flex items-center justify-center space-x-2">
+                        <span><TranslatedText>📱 Send Verification Code</TranslatedText></span>
                         <ChevronRight className="w-5 h-5" />
-                      </>
+                      </div>
                     )}
                   </button>
                 </form>
               )}
 
               {/* Toggle between login/signup */}
-              <div className="text-center">
+              <div className="text-center pt-2">
                 <p className="text-sm text-gray-600">
                   {mode === 'login' ? (
                     <TranslatedText>Don't have an account?</TranslatedText>
@@ -446,15 +504,13 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                       setPassword('')
                       setConfirmPassword('')
                       setPhoneNumber('')
-                      setOtp('')
                     }}
-                    className="text-emerald-600 hover:text-emerald-700 font-medium"
+                    className="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline transition-all duration-200"
                   >
-                    {mode === 'login' ? (
-                      <TranslatedText>Sign up</TranslatedText>
-                    ) : (
-                      <TranslatedText>Sign in</TranslatedText>
-                    )}
+                    {mode === 'login' ? 
+                      <TranslatedText>Sign Up Here</TranslatedText> : 
+                      <TranslatedText>Sign In Here</TranslatedText>
+                    }
                   </button>
                 </p>
               </div>
