@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { TranslatedText } from '../hooks/useAutoTranslation.jsx'
 import { 
   Trophy, 
@@ -20,9 +21,19 @@ import {
   Eye
 } from 'lucide-react'
 
-const CommunityPage = () => {
+const CommunityPage = ({ onBack, currentLanguage }) => {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('leaderboard')
   const [selectedProfile, setSelectedProfile] = useState(null)
+
+  // Handle back button click - use onBack prop if available, otherwise navigate
+  const handleBack = () => {
+    if (onBack && typeof onBack === 'function') {
+      onBack()
+    } else {
+      navigate('/')
+    }
+  }
 
   // Mock data - in real app this would come from API
   const leaderboardData = [
@@ -230,6 +241,15 @@ const CommunityPage = () => {
   return (
   <div className="animate-fade-in">
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Back Button */}
+        <button
+          onClick={handleBack}
+          className="flex items-center text-emerald-600 hover:text-emerald-700 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          <TranslatedText>Back to Home</TranslatedText>
+        </button>
+
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-text-dark mb-4"><TranslatedText>Community Hub</TranslatedText></h1>

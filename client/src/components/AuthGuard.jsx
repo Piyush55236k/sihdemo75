@@ -118,12 +118,17 @@ const AuthGuard = ({ children, feature = "feature", onClose }) => {
             </button>
           </div>
 
-          {/* Demo Note */}
-          <div className="mt-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-xs text-yellow-700">
-              <TranslatedText text="Demo Mode: Use OTP 123456 or 1234" />
-            </p>
-          </div>
+          {/* Close Button */}
+          <button
+            onClick={() => {
+              if (onClose) {
+                onClose();
+              }
+            }}
+            className="w-full text-gray-500 hover:text-gray-700 font-medium py-2 transition-colors duration-200"
+          >
+            <TranslatedText text="Maybe Later" />
+          </button>
         </div>
       </div>
 

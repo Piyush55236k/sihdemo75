@@ -1,163 +1,195 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "../supabaseClient";
 
-const AuthContext = createContext()
-
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
-}
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state from localStorage
   useEffect(() => {
-    const checkAuth = async () => {
+    const getSession = async () => {
       try {
-        const storedUser = localStorage.getItem('farmwise_user')
-        const storedToken = localStorage.getItem('farmwise_token')
-        
-        if (storedUser && storedToken) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-        }
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        setIsAuthenticated(!!session?.user);
       } catch (error) {
-        console.error('Error checking auth state:', error)
-        localStorage.removeItem('farmwise_user')
-        localStorage.removeItem('farmwise_token')
+        console.error('Error getting session:', error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false)
-    }
+    };
+    
+    getSession();
 
-    checkAuth()
-  }, [])
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setIsAuthenticated(!!session?.user);
+      setIsLoading(false);
+    });
 
-  const sendOTP = async (phoneNumber) => {
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
+
+  // Email/Password sign up
+  const signUp = async (email, password, metadata = {}) => {
     try {
-      // **DEMO MODE**: This is a mock API call - replace with actual SMS service
-      // In production, this would integrate with services like:
-      // - Twilio SMS API
-      // - AWS SNS
-      // - Fast2SMS (India)
-      // - MSG91 (India)
-      console.log(`🚨 DEMO MODE: In production, SMS would be sent to ${phoneNumber}`)
-      console.log('📱 For demo: Use OTP 123456 or 1234')
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: metadata,
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
       
-      const response = await new Promise(resolve => {
-        setTimeout(() => {
-          resolve({ 
-            success: true, 
-            message: 'Demo OTP sent! Use 123456 or 1234 to continue.',
-            isDemoMode: true 
-          })
-        }, 1000)
-      })
-      
-      return response
-    } catch (error) {
-      throw new Error('Failed to send OTP')
-    }
-  }
-
-  const verifyOTP = async (phoneNumber, otp) => {
-    try {
-      // **DEMO MODE**: This is a mock verification - replace with actual backend
-      console.log(`🚨 DEMO MODE: Verifying OTP ${otp} for ${phoneNumber}`)
-      
-      const response = await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (otp === '123456' || otp === '1234') { // Demo OTP codes
-            resolve({
-              success: true,
-              user: {
-                id: Date.now(),
-                phone: phoneNumber,
-                name: '',
-                profileComplete: false,
-                isDemoUser: true
-              },
-              token: 'mock_jwt_token_' + Date.now()
-            })
-          } else {
-            reject(new Error('Invalid OTP. For demo, use: 123456 or 1234'))
-          }
-        }, 1500)
-      })
-
-      if (response.success) {
-        setUser(response.user)
-        setIsAuthenticated(true)
-        localStorage.setItem('farmwise_user', JSON.stringify(response.user))
-        localStorage.setItem('farmwise_token', response.token)
+      if (error) {
+        // Provide more specific error messages
+        if (error.message.includes('already registered')) {
+          throw new Error('This email is already registered. Try signing in instead.');
+        } else if (error.message.includes('password')) {
+          throw new Error('Password must be at least 6 characters long.');
+        } else {
+          throw error;
+        }
       }
-
-      return response
-    } catch (error) {
-      throw error
-    }
-  }
-
-  const completeProfile = async (profileData) => {
-    try {
-      const updatedUser = {
-        ...user,
-        ...profileData,
-        profileComplete: true,
-        joinedDate: new Date().toISOString(),
-        level: 1,
-        totalPoints: 0,
-        sustainabilityScore: 0,
-        completedQuests: 0,
-        achievements: []
-      }
-
-      setUser(updatedUser)
-      localStorage.setItem('farmwise_user', JSON.stringify(updatedUser))
       
-      return { success: true, user: updatedUser }
+      return data;
     } catch (error) {
-      throw new Error('Failed to complete profile')
+      console.error('Signup error:', error);
+      throw error;
     }
-  }
+  };
 
-  const updateProfile = async (updates) => {
+  // Email/Password sign in
+  const signIn = async (email, password) => {
     try {
-      const updatedUser = { ...user, ...updates }
-      setUser(updatedUser)
-      localStorage.setItem('farmwise_user', JSON.stringify(updatedUser))
-      return { success: true, user: updatedUser }
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+      
+      if (error) {
+        // Provide more specific error messages
+        if (error.message.includes('Email not confirmed')) {
+          throw new Error('Please check your email and click the confirmation link before signing in.');
+        } else if (error.message.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password. Please check your credentials.');
+        } else if (error.message.includes('User not found')) {
+          throw new Error('No account found with this email. Please sign up first.');
+        } else {
+          throw error;
+        }
+      }
+      
+      return data;
     } catch (error) {
-      throw new Error('Failed to update profile')
+      console.error('Signin error:', error);
+      throw error;
     }
-  }
+  };
 
-  const logout = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('farmwise_user')
-    localStorage.removeItem('farmwise_token')
-  }
+  // Phone number OTP sign in (real implementation)
+  const signInWithPhone = async (phone) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: phone,
+        options: {
+          shouldCreateUser: true
+        }
+      });
+      
+      if (error) {
+        if (error.message.includes('phone')) {
+          throw new Error('Please enter a valid phone number.');
+        } else if (error.message.includes('rate limit')) {
+          throw new Error('Too many attempts. Please wait a moment before trying again.');
+        } else {
+          throw error;
+        }
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Phone signin error:', error);
+      throw error;
+    }
+  };
 
-  const value = {
-    user,
-    isAuthenticated,
-    isLoading,
-    sendOTP,
-    verifyOTP,
-    completeProfile,
-    updateProfile,
-    logout
-  }
+  // Verify phone OTP (real implementation)
+  const verifyOtp = async (phone, token) => {
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone,
+        token,
+        type: 'sms'
+      });
+      
+      if (error) {
+        if (error.message.includes('expired')) {
+          throw new Error('OTP has expired. Please request a new code.');
+        } else if (error.message.includes('invalid')) {
+          throw new Error('Invalid OTP. Please check the code and try again.');
+        } else {
+          throw error;
+        }
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('OTP verification error:', error);
+      throw error;
+    }
+  };
+
+  // Update user profile
+  const updateProfile = async (profileData) => {
+    const { data, error } = await supabase.auth.updateUser({
+      data: profileData
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  // Sign out
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
+  // Legacy method names for backward compatibility
+  const login = signIn;
+  const logout = signOut;
+  const sendOTP = signInWithPhone;
+  const verifyOTP = verifyOtp;
+  const completeProfile = updateProfile;
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isAuthenticated, 
+      isLoading,
+      signUp,
+      signIn,
+      signInWithPhone,
+      verifyOtp,
+      updateProfile,
+      signOut,
+      // Legacy method names
+      login,
+      logout,
+      sendOTP,
+      verifyOTP,
+      completeProfile
+    }}>
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);

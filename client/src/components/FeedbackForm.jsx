@@ -167,7 +167,7 @@ const FeedbackForm = ({ isOpen, onClose }) => {
 
       // Handle file upload separately if there's a photo
       if (formData.cropIssuePhoto) {
-        // For demo, we'll just indicate that a photo was uploaded
+        // TODO: Implement real file upload to backend/cloud storage
         submitData.cropIssuePhoto = "photo_uploaded_" + Date.now();
       }
 

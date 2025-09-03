@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import SoilFertilizerPage from "./pages/SoilFertilizerPage";
 import QuestPage from "./pages/QuestPage";
 import CommunityPage from "./pages/CommunityPage";
+import AuthCallback from "./pages/auth/AuthCallback";
 import ChatBotWidget from "./components/ChatBotWidget";
 import AuthStatus from "./components/AuthStatus";
 
@@ -39,6 +40,7 @@ function App() {
             <Route path="/quests" element={<QuestPage />} />
             <Route path="/community" element={<CommunityPage />} />
             <Route path="/soil-fertilizer" element={<SoilFertilizerPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
           </Routes>
           {/* AI Chatbot Widget - Available on all pages */}
           <ChatBotWidget />

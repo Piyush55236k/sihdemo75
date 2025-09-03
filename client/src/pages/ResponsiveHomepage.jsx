@@ -6,16 +6,14 @@ import ImprovedProfilePage from "./ImprovedProfilePage";
 import PestCheckPage from "./PestCheckPage.jsx";
 import MarketPricesPage from "./MarketPricesPage.jsx";
 import CropCalendarPage from "./CropCalendarPage.jsx";
-import QuestDemoPage from "./QuestDemoPage.jsx";
-import CommunityDemoPage from "./CommunityDemoPage.jsx";
-import HelpDemoPage from "./HelpDemoPage.jsx";
-import NotificationsDemoPage from "./NotificationsDemoPage.jsx";
-import PrivacyDemoPage from "./PrivacyDemoPage.jsx";
+import QuestPage from "./QuestPage.jsx";
+import CommunityPage from "./CommunityPage.jsx";
 import {
   TranslatedText,
   useAutoTranslation,
 } from "../hooks/useAutoTranslation.jsx";
 import APIService from "../services/apiService.js";
+import WeatherService from "../services/weatherService.js";
 import {
   Mic,
   MicOff,
@@ -74,6 +72,7 @@ const ResponsiveHomepage = () => {
   // UI State
   const [currentPage, setCurrentPage] = useState("home");
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
   const [showCropAdvisory, setShowCropAdvisory] = useState(false);
   const [micEnabled, setMicEnabled] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -86,6 +85,7 @@ const ResponsiveHomepage = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [weatherData, setWeatherData] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+  const [weatherService] = useState(new WeatherService());
 
   // Enhanced image validation function
   const validateImage = (file) => {
@@ -165,23 +165,65 @@ const ResponsiveHomepage = () => {
       requiresAuth: true,
       guestDescription: "Join the farmer community",
     },
+    {
+      id: 7,
+      title: "Crop Advisory",
+      icon: Camera,
+      color: "bg-teal-50 text-teal-600 border-teal-200",
+      requiresAuth: false,
+      guestDescription: "Get AI-powered crop recommendations based on soil analysis",
+    },
   ];
 
   // Initialize app with enhanced features
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Get user location
-        const location = await APIService.getCurrentLocation();
+        // Get user location using WeatherService
+        const location = await weatherService.getCurrentLocation();
         setUserLocation(location);
 
-        // Load weather data with language support
-        const weather = await APIService.getWeather(
-          location.lat,
-          location.lon,
-          currentLanguage
+        // Load current weather data
+        const currentWeather = await weatherService.getCurrentWeather(
+          location.latitude,
+          location.longitude
         );
-        setWeatherData(weather);
+
+        // Load weather forecast
+        const forecastData = await weatherService.getWeatherForecast(
+          location.latitude,
+          location.longitude
+        );
+
+        // Format data to match the existing UI structure
+        const formattedWeatherData = {
+          current: {
+            temp: Math.round(currentWeather.temperature),
+            humidity: currentWeather.humidity,
+            rain_mm: currentWeather.rainfall,
+            location: currentWeather.location,
+            country: currentWeather.country,
+            weather: currentWeather.weather,
+            description: currentWeather.description
+          },
+          forecast: forecastData.forecast.slice(0, 4).map((item, index) => {
+            const dayNames = ['Today', 'Tomorrow'];
+            const date = new Date(item.datetime);
+            return {
+              d: index < 2 ? dayNames[index] : date.toLocaleDateString('en', { weekday: 'short' }),
+              t_min: Math.round(item.minTemp || item.temperature - 3),
+              t_max: Math.round(item.maxTemp || item.temperature + 2),
+              rain_mm: item.rainfall,
+              icon: item.weather.toLowerCase().includes('rain') ? 'rain' : 
+                    item.weather.toLowerCase().includes('cloud') ? 'cloud' : 'sun',
+              humidity: item.humidity,
+              weather: item.weather
+            };
+          }),
+          alerts: forecastData.alerts || []
+        };
+
+        setWeatherData(formattedWeatherData);
       } catch (error) {
         console.error("Failed to initialize app:", error);
         // Use fallback data if API fails
@@ -288,7 +330,8 @@ const ResponsiveHomepage = () => {
 
   const handleQuickAction = (actionId, action) => {
     // Check if action requires authentication
-    if (action.requiresAuth && !isAuthenticated) {
+    if (action && action.requiresAuth && !isAuthenticated) {
+      setAuthMode('login');
       setShowAuthModal(true);
       return;
     }
@@ -312,12 +355,19 @@ const ResponsiveHomepage = () => {
         setCurrentPage("profile");
         break;
       case 6: // Community
-        // Navigate to community page (would be implemented)
-        console.log("Navigate to community");
+        setCurrentPage("community");
+        break;
+      case 7: // Crop Advisory
+        setShowCropAdvisory(true);
         break;
       default:
         console.log("Quick action clicked:", actionId);
     }
+  };
+
+  const openAuthModal = (mode = 'login') => {
+    setAuthMode(mode);
+    setShowAuthModal(true);
   };
 
   const calculateRiskLevel = () => {
@@ -394,7 +444,7 @@ const ResponsiveHomepage = () => {
 
   if (currentPage === "quest") {
     return (
-      <QuestDemoPage
+      <QuestPage
         onBack={handleBackToHome}
         currentLanguage={currentLanguage}
       />
@@ -403,38 +453,18 @@ const ResponsiveHomepage = () => {
 
   if (currentPage === "community") {
     return (
-      <CommunityDemoPage
+      <CommunityPage
         onBack={handleBackToHome}
         currentLanguage={currentLanguage}
       />
     );
   }
 
-  if (currentPage === "help") {
-    return (
-      <HelpDemoPage
-        onBack={handleBackToHome}
-        currentLanguage={currentLanguage}
-      />
-    );
-  }
-
-  if (currentPage === "notifications") {
-    return (
-      <NotificationsDemoPage
-        onBack={handleBackToHome}
-        currentLanguage={currentLanguage}
-      />
-    );
-  }
-
-  if (currentPage === "privacy") {
-    return (
-      <PrivacyDemoPage
-        onBack={handleBackToHome}
-        currentLanguage={currentLanguage}
-      />
-    );
+  // Remove demo pages - implement real Help, Notifications, and Privacy pages later
+  if (currentPage === "help" || currentPage === "notifications" || currentPage === "privacy") {
+    // For now, redirect back to home - these can be implemented as real pages later
+    handleBackToHome();
+    return null;
   }
 
   const risk = calculateRiskLevel();
@@ -446,6 +476,7 @@ const ResponsiveHomepage = () => {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
+        initialMode={authMode}
       />
 
       {/* Desktop Header */}
@@ -549,7 +580,7 @@ const ResponsiveHomepage = () => {
               ) : (
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => setShowAuthModal(true)}
+                    onClick={() => openAuthModal('login')}
                     className="flex items-center space-x-2 text-slate-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-colors"
                   >
                     <LogIn className="w-4 h-4" />
@@ -558,7 +589,7 @@ const ResponsiveHomepage = () => {
                     </span>
                   </button>
                   <button
-                    onClick={() => setShowAuthModal(true)}
+                    onClick={() => openAuthModal('signup')}
                     className="flex items-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                   >
                     <UserPlus className="w-4 h-4" />
@@ -611,24 +642,27 @@ const ResponsiveHomepage = () => {
                   )}
                 </p>
 
-                {/* Crop Advisory Section */}
+                {/* Soil Fertilizer Section */}
                 <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 mb-6">
                   <h2 className="text-xl font-semibold text-slate-800 mb-4">
-                    <TranslatedText>Crop Advisory</TranslatedText>
+                    <TranslatedText>Soil Fertilizer Recommendation</TranslatedText>
                   </h2>
                   <p className="text-slate-600 mb-4">
                     <TranslatedText>
-                      Get AI-powered crop recommendations based on soil analysis
-                      and weather data
+                      Get personalized fertilizer recommendations based on your soil analysis and crop type. Our ML-powered system provides accurate NPK and micronutrient suggestions.
                     </TranslatedText>
                   </p>
                   <button
-                    onClick={() => setShowCropAdvisory(true)}
+                    onClick={() => {
+                      if (window && window.location) {
+                        window.location.href = "/soil-fertilizer";
+                      }
+                    }}
                     className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
-                    <Camera className="w-6 h-6" />
+                    <Leaf className="w-6 h-6" />
                     <span>
-                      <TranslatedText>Start Soil Analysis</TranslatedText>
+                      <TranslatedText>Get Fertilizer Advice</TranslatedText>
                     </span>
                     <ArrowRight className="w-5 h-5" />
                   </button>
@@ -809,10 +843,13 @@ const ResponsiveHomepage = () => {
                   <Sun className="w-10 h-10 text-amber-500" />
                 </div>
 
-                {userLocation && (
+                {weatherData.current.location && (
                   <div className="flex items-center text-sm text-slate-500">
                     <MapPin className="w-4 h-4 mr-1" />
-                    <span>Your Location</span>
+                    <span>{weatherData.current.location}</span>
+                    {weatherData.current.country && (
+                      <span>, {weatherData.current.country}</span>
+                    )}
                   </div>
                 )}
               </div>
@@ -847,29 +884,66 @@ const ResponsiveHomepage = () => {
               </div>
             </div>
 
-            {/* Alerts */}
-            {weatherData.alerts.length > 0 && (
+            {/* Weather Alerts */}
+            {weatherData.alerts && weatherData.alerts.length > 0 && (
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
                 <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
                   <AlertTriangle className="w-5 h-5 mr-2 text-amber-600" />
                   <TranslatedText>Weather Alerts</TranslatedText>
+                  <span className="ml-2 bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">
+                    {weatherData.alerts.length}
+                  </span>
                 </h3>
 
                 <div className="space-y-3">
                   {weatherData.alerts.map((alert, index) => (
                     <div
-                      key={index}
-                      className={`p-3 rounded-lg ${
-                        alert.severity === "high"
-                          ? "bg-red-50 text-red-800"
+                      key={alert.id || index}
+                      className={`p-4 rounded-xl border-l-4 ${
+                        alert.severity === "critical" || alert.severity === "high"
+                          ? "bg-red-50 border-red-400 text-red-900"
                           : alert.severity === "medium"
-                          ? "bg-amber-50 text-amber-800"
-                          : "bg-blue-50 text-blue-800"
+                          ? "bg-amber-50 border-amber-400 text-amber-900"
+                          : "bg-blue-50 border-blue-400 text-blue-900"
                       }`}
                     >
-                      <p className="text-sm">
-                        <TranslatedText>{alert.desc}</TranslatedText>
-                      </p>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm mb-1">
+                            <TranslatedText>{alert.title}</TranslatedText>
+                          </h4>
+                          <p className="text-sm mb-2 opacity-90">
+                            <TranslatedText>{alert.description || alert.desc}</TranslatedText>
+                          </p>
+                          {alert.farmingAdvice && (
+                            <div className="mt-2 p-2 bg-white/50 rounded-lg">
+                              <p className="text-xs font-medium text-green-800 mb-1">
+                                <TranslatedText>Farming Advice:</TranslatedText>
+                              </p>
+                              <p className="text-xs text-green-700">
+                                <TranslatedText>{alert.farmingAdvice}</TranslatedText>
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-3">
+                          <span className={`inline-block w-2 h-2 rounded-full ${
+                            alert.severity === "critical" || alert.severity === "high"
+                              ? "bg-red-400"
+                              : alert.severity === "medium"
+                              ? "bg-amber-400"
+                              : "bg-blue-400"
+                          }`}></span>
+                        </div>
+                      </div>
+                      
+                      {alert.expires && (
+                        <div className="mt-2 text-xs opacity-75">
+                          <TranslatedText>
+                            Valid until: {new Date(alert.expires).toLocaleDateString()}
+                          </TranslatedText>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1029,7 +1103,7 @@ const ResponsiveHomepage = () => {
                 <button
                   onClick={() => {
                     if (!isAuthenticated) {
-                      setShowAuthModal(true);
+                      openAuthModal('login');
                     } else {
                       console.log("Navigate to community");
                     }
@@ -1057,7 +1131,7 @@ const ResponsiveHomepage = () => {
                 <div className="mt-6 pt-6 border-t border-slate-200">
                   <button
                     onClick={() => {
-                      setShowAuthModal(true);
+                      openAuthModal('signup');
                       setSidebarOpen(false);
                     }}
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
