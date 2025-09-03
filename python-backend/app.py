@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from math import ceil
@@ -182,20 +181,6 @@ def recommend_for_farmer(inputs: Dict[str, Any], crop_name: str) -> Tuple[List[s
         messages.append("High salinity: grow salt-tolerant crops and improve irrigation.")
 
     return messages, fert_plan
-
-# ---------------- API Endpoint ---------------- #
-
-@app.route("/recommend", methods=["POST"])
-def recommend():
-    data = request.json
-    crop = data.get("crop")
-    inputs = data.get("inputs", {})
-
-    try:
-        msgs, plan = recommend_for_farmer(inputs, crop)
-        return jsonify({"messages": msgs, "fertilizer_plan": plan})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
 
 # ---------------- Run API ---------------- #
 
