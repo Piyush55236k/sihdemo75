@@ -130,7 +130,7 @@ export const AuthProvider = ({ children }) => {
         password,
         options: {
           data: metadata,
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: `${window.location.origin}/`
         }
       });
       
