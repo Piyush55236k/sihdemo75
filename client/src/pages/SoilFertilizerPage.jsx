@@ -7,14 +7,28 @@ const SoilFertilizerPage = () => {
   const [inputs, setInputs] = useState({
     N: '', P: '', K: '', S: '', Zn: '', Fe: '', Cu: '', Mn: '', B: '', OC: '', pH: '', EC: ''
   });
+  const [customInputs, setCustomInputs] = useState({});
   const [recommendation, setRecommendation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Mandatory fields
-  const requiredFields = ['N', 'P', 'K', 'pH', 'OC'];
+  const requiredFields = ['N', 'P', 'K', 'pH', 'EC'];
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (value === 'custom') {
+      // Show custom input field
+      setCustomInputs((prev) => ({ ...prev, [name]: true }));
+      setInputs((prev) => ({ ...prev, [name]: '' }));
+    } else {
+      // Hide custom input field and set the value
+      setCustomInputs((prev) => ({ ...prev, [name]: false }));
+      setInputs((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleCustomInputChange = (e) => {
     const { name, value } = e.target;
     setInputs((prev) => ({ ...prev, [name]: value }));
   };
@@ -75,16 +89,32 @@ const SoilFertilizerPage = () => {
                   {key}
                   <span className="text-red-500 ml-1">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   name={key}
                   id={key}
-                  value={inputs[key]}
+                  value={customInputs[key] ? 'custom' : inputs[key]}
                   onChange={handleInputChange}
-                  className="w-full border rounded p-2 border-red-400"
-                  placeholder={`Enter ${key} (required)`}
+                  className="w-full border rounded p-2 border-red-400 mb-1"
                   required
-                />
+                >
+                  <option value="">Select {key} level</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="custom">Custom Value</option>
+                </select>
+                {customInputs[key] && (
+                  <input
+                    type="number"
+                    step="0.1"
+                    name={key}
+                    value={inputs[key]}
+                    onChange={handleCustomInputChange}
+                    className="w-full border rounded p-2 border-red-400"
+                    placeholder={`Enter custom ${key} value`}
+                    required
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -93,15 +123,30 @@ const SoilFertilizerPage = () => {
             {Object.keys(inputs).filter(key => !requiredFields.includes(key)).map((key) => (
               <div key={key} className="flex-1 min-w-[120px]">
                 <label className="block font-semibold mb-1" htmlFor={key}>{key}</label>
-                <input
-                  type="text"
+                <select
                   name={key}
                   id={key}
-                  value={inputs[key]}
+                  value={customInputs[key] ? 'custom' : inputs[key]}
                   onChange={handleInputChange}
-                  className="w-full border rounded p-2"
-                  placeholder={`Enter ${key} (optional)`}
-                />
+                  className="w-full border rounded p-2 mb-1"
+                >
+                  <option value="">Select {key} level</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="custom">Custom Value</option>
+                </select>
+                {customInputs[key] && (
+                  <input
+                    type="number"
+                    step="0.1"
+                    name={key}
+                    value={inputs[key]}
+                    onChange={handleCustomInputChange}
+                    className="w-full border rounded p-2"
+                    placeholder={`Enter custom ${key} value`}
+                  />
+                )}
               </div>
             ))}
           </div>
