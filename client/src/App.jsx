@@ -39,7 +39,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/quests" element={<QuestPage />} />
             <Route path="/community" element={<CommunityPage />} />
-            <Route path="/soil-fertilizer" element={<SoilFertilizerPage />} />
+            <Route path="/SoilFertilizerPage" element={<SoilFertilizerPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
           </Routes>
           {/* AI Chatbot Widget - Available on all pages */}

@@ -341,7 +341,7 @@ const ResponsiveHomepage = () => {
         break;
       case 2: // Soil/Fertilizer
         if (window && window.location) {
-          window.location.href = "/soil-fertilizer";
+          window.location.href = "/SoilFertilizerPage";
         }
         break;
       case 3: // Market Prices
@@ -702,7 +702,7 @@ const ResponsiveHomepage = () => {
                   <button
                     onClick={() => {
                       if (window && window.location) {
-                        window.location.href = "/soil-fertilizer";
+                        window.location.href = "/SoilFertilizerPage";
                       }
                     }}
                     className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-105"
