@@ -16,84 +16,58 @@ const MarketPricesPage = ({ onBack, currentLanguage }) => {
     { id: 'pulses', name: currentLanguage === 'hi' ? 'दालें' : 'Pulses' },
   ]
 
-  // Mock data for market prices
-  const mockPricesData = [
-    {
-      id: 1,
-      name: currentLanguage === 'hi' ? 'गेहूं' : 'Wheat',
-      category: 'cereals',
-      currentPrice: 2100,
-      previousPrice: 2050,
-      unit: currentLanguage === 'hi' ? 'प्रति क्विंटल' : 'per quintal',
-      market: currentLanguage === 'hi' ? 'दिल्ली मंडी' : 'Delhi Market',
-      trend: 'up'
-    },
-    {
-      id: 2,
-      name: currentLanguage === 'hi' ? 'चावल' : 'Rice',
-      category: 'cereals',
-      currentPrice: 3200,
-      previousPrice: 3250,
-      unit: currentLanguage === 'hi' ? 'प्रति क्विंटल' : 'per quintal',
-      market: currentLanguage === 'hi' ? 'पंजाब मंडी' : 'Punjab Market',
-      trend: 'down'
-    },
-    {
-      id: 3,
-      name: currentLanguage === 'hi' ? 'आलू' : 'Potato',
-      category: 'vegetables',
-      currentPrice: 1200,
-      previousPrice: 1150,
-      unit: currentLanguage === 'hi' ? 'प्रति क्विंटल' : 'per quintal',
-      market: currentLanguage === 'hi' ? 'उत्तर प्रदेश मंडी' : 'UP Market',
-      trend: 'up'
-    },
-    {
-      id: 4,
-      name: currentLanguage === 'hi' ? 'प्याज' : 'Onion',
-      category: 'vegetables',
-      currentPrice: 2800,
-      previousPrice: 2900,
-      unit: currentLanguage === 'hi' ? 'प्रति क्विंटल' : 'per quintal',
-      market: currentLanguage === 'hi' ? 'महाराष्ट्र मंडी' : 'Maharashtra Market',
-      trend: 'down'
-    },
-    {
-      id: 5,
-      name: currentLanguage === 'hi' ? 'टमाटर' : 'Tomato',
-      category: 'vegetables',
-      currentPrice: 1800,
-      previousPrice: 1700,
-      unit: currentLanguage === 'hi' ? 'प्रति क्विंटल' : 'per quintal',
-      market: currentLanguage === 'hi' ? 'कर्नाटक मंडी' : 'Karnataka Market',
-      trend: 'up'
-    }
-  ]
+  // Helper to map API commodity/category to our UI categories
+  const getCategory = (commodity) => {
+    const cereals = ['Wheat', 'Rice', 'Barley', 'Maize', 'Jowar', 'Bajra'];
+    const vegetables = ['Potato', 'Onion', 'Tomato', 'Cabbage', 'Cauliflower', 'Brinjal'];
+    const fruits = ['Apple', 'Banana', 'Mango', 'Orange', 'Grapes'];
+    const pulses = ['Gram', 'Moong', 'Urad', 'Masur', 'Arhar'];
+    if (cereals.includes(commodity)) return 'cereals';
+    if (vegetables.includes(commodity)) return 'vegetables';
+    if (fruits.includes(commodity)) return 'fruits';
+    if (pulses.includes(commodity)) return 'pulses';
+    return 'other';
+  };
+
+  const API_KEY = '579b464db66ec23bdd000001dda46aaf9c6b461e48b39f92f735f8b0';
+  const BASE_URL = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070';
 
   const searchPrices = async () => {
-    setLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      let filtered = mockPricesData
-      
+    setLoading(true);
+    let url = `${BASE_URL}?api-key=${API_KEY}&format=json&limit=100`;
+    if (searchTerm) url += `&filters[commodity]=${encodeURIComponent(searchTerm)}`;
+    if (location) url += `&filters[market]=${encodeURIComponent(location)}`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      let records = data.records || [];
+      // Filter by category if not 'all'
       if (selectedCategory !== 'all') {
-        filtered = filtered.filter(item => item.category === selectedCategory)
+        records = records.filter(item => getCategory(item.commodity) === selectedCategory);
       }
-      
-      if (searchTerm) {
-        filtered = filtered.filter(item => 
-          item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      }
-      
-      setPricesData(filtered)
-      setLoading(false)
-    }, 1000)
-  }
+      // Map API data to UI format
+      const mapped = records.map((item, idx) => ({
+        id: idx + 1,
+        name: item.commodity,
+        category: getCategory(item.commodity),
+        currentPrice: Number(item.modal_price),
+        previousPrice: Number(item.min_price),
+        unit: item.unit_of_price,
+        market: item.market,
+        trend: Number(item.modal_price) >= Number(item.min_price) ? 'up' : 'down',
+      }));
+      setPricesData(mapped);
+    } catch (e) {
+      setPricesData([]);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    searchPrices()
-  }, [selectedCategory])
+    searchPrices();
+    // eslint-disable-next-line
+  }, [selectedCategory]);
 
   const getTrendIcon = (trend) => {
     if (trend === 'up') {
