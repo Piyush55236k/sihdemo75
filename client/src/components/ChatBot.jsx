@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import config from "../config/env";
-import { fetchGeminiChatResponse } from "../services/geminiService";
 
 const ChatBot = ({ isOpen, onClose }) => {
   const { user, isAuthenticated } = useAuth();

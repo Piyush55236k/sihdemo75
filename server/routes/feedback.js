@@ -1,5 +1,14 @@
+
 const express = require('express');
 const router = express.Router();
+const { createClient } = require('@supabase/supabase-js');
+const { config } = require('../config/env');
+
+// Initialize Supabase client
+const supabase = createClient(
+  config.auth.supabase.url,
+  config.auth.supabase.anonKey
+);
 
 // POST /api/feedback/submit - Submit user feedback
 router.post('/submit', async (req, res) => {
@@ -27,39 +36,47 @@ router.post('/submit', async (req, res) => {
       });
     }
 
-    // In a real application, you would save this to your database
-    // For demo purposes, we'll just log it and return success
-    console.log('📝 DEMO MODE: Feedback received:', {
-      userId,
-      userName,
-      userPhone,
-      userLocation,
-      advisoryRating,
-      overallRating,
-      adoptedAdvice: adoptedAdvice?.length || 0,
-      hasPhoto: !!cropIssuePhoto,
-      hasSuggestions: !!suggestions,
-      hasQuestions: !!questions,
-      language,
-      timestamp: new Date().toISOString()
-    });
 
-    // Simulate database save
-    const feedbackId = 'feedback_' + Date.now();
-    
-    // Mock response
-    const response = {
+    // Insert feedback into Supabase
+    const { data, error } = await supabase
+      .from('feedback')
+      .insert([{
+        user_id: userId,
+        user_name: userName,
+        user_phone: userPhone,
+        user_location: userLocation,
+        advisory_rating: advisoryRating,
+        overall_rating: overallRating,
+        crop_issue_photo: cropIssuePhoto,
+        voice_notes: voiceNotes,
+        adopted_advice: adoptedAdvice,
+        suggestions,
+        questions,
+        language,
+        submitted_at: new Date().toISOString()
+      }]);
+
+    if (error) {
+      console.error('❌ Supabase insert error:', error);
+      return res.status(500).json({
+        success: false,
+        message: language === 'hi'
+          ? 'फीडबैक जमा करने में समस्या हुई। कृपया पुनः प्रयास करें।'
+          : 'There was a problem submitting your feedback. Please try again.',
+        error: error.message
+      });
+    }
+
+    const feedbackId = data && data[0] && data[0].id ? data[0].id : null;
+    res.json({
       success: true,
-      message: language === 'hi' 
-        ? 'आपकी फीडबैक सफलतापूर्वक जमा की गई है। धन्यवाद!' 
+      message: language === 'hi'
+        ? 'आपकी फीडबैक सफलतापूर्वक जमा की गई है। धन्यवाद!'
         : 'Your feedback has been submitted successfully. Thank you!',
       feedbackId,
       submittedAt: new Date().toISOString(),
-      pointsEarned: 10, // Demo: user earns 10 points for feedback
-      isDemoMode: true
-    };
-
-    res.json(response);
+      pointsEarned: 10
+    });
 
   } catch (error) {
     console.error('❌ Feedback submission error:', error);
@@ -80,30 +97,29 @@ router.get('/user/:userId', async (req, res) => {
     const { userId } = req.params;
     const { language = 'en' } = req.query;
 
-    // In a real application, you would fetch from database
-    // For demo, return mock data
-    const mockFeedbacks = [
-      {
-        id: 'feedback_1',
-        submittedAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        advisoryRating: 'very_helpful',
-        overallRating: 5,
-        status: 'reviewed'
-      },
-      {
-        id: 'feedback_2',
-        submittedAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-        advisoryRating: 'helpful',
-        overallRating: 4,
-        status: 'pending'
-      }
-    ];
+
+    // Fetch feedbacks from Supabase
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('*')
+      .eq('user_id', userId)
+      .order('submitted_at', { ascending: false });
+
+    if (error) {
+      console.error('❌ Supabase fetch error:', error);
+      return res.status(500).json({
+        success: false,
+        message: req.query.language === 'hi'
+          ? 'फीडबैक इतिहास लोड करने में समस्या हुई।'
+          : 'There was a problem loading feedback history.',
+        error: error.message
+      });
+    }
 
     res.json({
       success: true,
-      feedbacks: mockFeedbacks,
-      totalCount: mockFeedbacks.length,
-      isDemoMode: true
+      feedbacks: data,
+      totalCount: data.length
     });
 
   } catch (error) {
@@ -122,29 +138,41 @@ router.get('/user/:userId', async (req, res) => {
 // GET /api/feedback/stats - Get feedback statistics (admin)
 router.get('/stats', async (req, res) => {
   try {
-    // Mock statistics for demo
-    const mockStats = {
-      totalFeedbacks: 150,
-      averageRating: 4.2,
-      satisfactionRate: 85,
-      mostHelpfulAdvice: 'crop_disease_treatment',
-      commonSuggestions: [
-        'More regional language support',
-        'Offline mode capability',
-        'Video tutorials'
-      ],
-      adoptionRate: {
-        high: 60,
-        medium: 30,
-        low: 10
-      }
-    };
+
+    // Fetch feedback stats from Supabase
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('overall_rating, advisory_rating, adopted_advice, suggestions');
+
+    if (error) {
+      console.error('❌ Supabase stats fetch error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'There was a problem loading feedback statistics.',
+        error: error.message
+      });
+    }
+
+    // Calculate stats
+    const totalFeedbacks = data.length;
+    const averageRating = totalFeedbacks > 0 ? (data.reduce((sum, f) => sum + (f.overall_rating || 0), 0) / totalFeedbacks).toFixed(2) : 0;
+    // Example: satisfaction rate = % of feedbacks with rating >= 4
+    const satisfactionRate = totalFeedbacks > 0 ? Math.round((data.filter(f => (f.overall_rating || 0) >= 4).length / totalFeedbacks) * 100) : 0;
+    // Most common suggestion/advice (simple count)
+    const suggestionsArr = data.map(f => f.suggestions).filter(Boolean);
+    const suggestionCounts = {};
+    suggestionsArr.forEach(s => { suggestionCounts[s] = (suggestionCounts[s] || 0) + 1; });
+    const commonSuggestions = Object.entries(suggestionCounts).sort((a, b) => b[1] - a[1]).map(([s]) => s).slice(0, 3);
 
     res.json({
       success: true,
-      stats: mockStats,
-      generatedAt: new Date().toISOString(),
-      isDemoMode: true
+      stats: {
+        totalFeedbacks,
+        averageRating: Number(averageRating),
+        satisfactionRate,
+        commonSuggestions
+      },
+      generatedAt: new Date().toISOString()
     });
 
   } catch (error) {
