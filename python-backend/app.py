@@ -6,6 +6,9 @@ import os
 from typing import Any, Dict, Tuple, List, Optional
 
 def create_app() -> Flask:
+    @app.route("/")
+    def home():
+        return "Agro_Mitra Python backend is running!", 200
     """Factory to create and configure the Flask app for production."""
     app = Flask(__name__)
     # Restrict CORS to frontend domain in production
