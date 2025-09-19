@@ -7,7 +7,9 @@ import {
   ArrowRight,
   AlertTriangle,
   Calendar,
-  Leaf
+  Leaf,
+  Cloud,
+  CloudRain
 } from 'lucide-react';
 import logo1 from '../../../logo1.jpg';
 import AuthModal from '../components/AuthModal';
@@ -16,24 +18,115 @@ import MarketPricesPage from './MarketPricesPage';
 import CropCalendarPage from './CropCalendarPage';
 import QuestPage from './QuestPage';
 import { useAuth } from '../components/AuthProvider';
+import WeatherService from '../services/weatherService';
 
 const CleanHomepage = () => {
   const { isAuthenticated } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
   const [currentLanguage] = useState('en');
+  const [weatherData, setWeatherData] = useState({
+    temperature: '--',
+    humidity: '--',
+    location: 'Loading...',
+    condition: 'Unknown',
+    forecast: []
+  });
+  const [isLoadingWeather, setIsLoadingWeather] = useState(true);
 
-  // Weather data mock
-  const weatherData = {
-    temperature: 28,
-    humidity: 65,
-    location: 'Ahmedabad, Gujarat',
-    forecast: [
-      { day: 'Today', high: 32, low: 24 },
-      { day: 'Tomorrow', high: 31, low: 23 },
-      { day: 'Wed', high: 29, low: 22 },
-      { day: 'Thu', high: 30, low: 23 }
-    ]
+  // Initialize weather service
+  const weatherService = new WeatherService();
+
+  // Load weather data
+  useEffect(() => {
+    const loadWeatherData = async () => {
+      try {
+        setIsLoadingWeather(true);
+        
+        // Try to get user's location
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const { latitude, longitude } = position.coords;
+              try {
+                const weather = await weatherService.getCurrentWeather(latitude, longitude);
+                const forecast = await weatherService.getForecast(latitude, longitude, 4);
+                
+                setWeatherData({
+                  temperature: Math.round(weather.temperature),
+                  humidity: weather.humidity,
+                  location: weather.location,
+                  condition: weather.condition,
+                  forecast: forecast.slice(0, 4)
+                });
+              } catch (error) {
+                console.error('Error fetching weather:', error);
+                // Use default location as fallback
+                await loadDefaultWeather();
+              }
+            },
+            async (error) => {
+              console.log('Geolocation error:', error);
+              // Use default location as fallback
+              await loadDefaultWeather();
+            }
+          );
+        } else {
+          await loadDefaultWeather();
+        }
+      } catch (error) {
+        console.error('Weather loading error:', error);
+        await loadDefaultWeather();
+      } finally {
+        setIsLoadingWeather(false);
+      }
+    };
+
+    const loadDefaultWeather = async () => {
+      try {
+        // Default to Ahmedabad coordinates
+        const weather = await weatherService.getCurrentWeather(23.0225, 72.5714);
+        const forecast = await weatherService.getForecast(23.0225, 72.5714, 4);
+        
+        setWeatherData({
+          temperature: Math.round(weather.temperature),
+          humidity: weather.humidity,
+          location: weather.location || 'Ahmedabad, Gujarat',
+          condition: weather.condition,
+          forecast: forecast.slice(0, 4)
+        });
+      } catch (error) {
+        console.error('Default weather error:', error);
+        // Use mock data as final fallback
+        setWeatherData({
+          temperature: 28,
+          humidity: 65,
+          location: 'Ahmedabad, Gujarat',
+          condition: 'Sunny',
+          forecast: [
+            { day: 'Today', high: 32, low: 24, condition: 'Sunny' },
+            { day: 'Tomorrow', high: 31, low: 23, condition: 'Partly Cloudy' },
+            { day: 'Wed', high: 29, low: 22, condition: 'Cloudy' },
+            { day: 'Thu', high: 30, low: 23, condition: 'Sunny' }
+          ]
+        });
+      }
+    };
+
+    loadWeatherData();
+  }, []);
+
+  // Get weather icon based on condition
+  const getWeatherIcon = (condition) => {
+    const cond = condition?.toLowerCase() || '';
+    if (cond.includes('sunny') || cond.includes('clear')) {
+      return <Sun className="w-12 h-12 text-yellow-500" />;
+    } else if (cond.includes('cloud')) {
+      return <Cloud className="w-12 h-12 text-gray-500" />;
+    } else if (cond.includes('rain')) {
+      return <CloudRain className="w-12 h-12 text-blue-500" />;
+    }
+    return <Sun className="w-12 h-12 text-yellow-500" />;
   };
 
   // Quick actions data
@@ -89,7 +182,29 @@ const CleanHomepage = () => {
   ];
 
   const handleQuickAction = (actionId) => {
-    setCurrentPage(actionId);
+    // Navigate to the appropriate route for each action
+    switch(actionId) {
+      case 'pest-check':
+        window.location.href = '/pest-check';
+        break;
+      case 'soil-fertilizer':
+        window.location.href = '/SoilFertilizerPage';
+        break;
+      case 'market-prices':
+        window.location.href = '/market-prices';
+        break;
+      case 'crop-calendar':
+        window.location.href = '/crop-calendar';
+        break;
+      case 'my-progress':
+        window.location.href = '/quests';
+        break;
+      case 'crop-advisory':
+        window.location.href = '/SoilFertilizerPage';
+        break;
+      default:
+        setCurrentPage(actionId);
+    }
   };
 
   const handleNavigation = (page) => {
@@ -145,10 +260,16 @@ const CleanHomepage = () => {
                 FEATURES
               </button>
               <button 
-                onClick={() => handleNavigation('quest')}
+                onClick={() => window.location.href = '/quests'}
                 className="text-gray-700 hover:text-green-600 font-medium"
               >
                 QUEST
+              </button>
+              <button 
+                onClick={() => window.location.href = '/faq'}
+                className="text-gray-700 hover:text-green-600 font-medium"
+              >
+                FAQ
               </button>
               <button 
                 onClick={() => handleNavigation('community')}
@@ -275,20 +396,32 @@ const CleanHomepage = () => {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-800">Weather</h3>
-                <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">Low Risk</span>
+                <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
+                  {weatherData.condition}
+                </span>
               </div>
               
               <div className="text-center mb-4">
-                <div className="text-4xl font-bold text-gray-800">{weatherData.temperature}°C</div>
-                <div className="text-sm text-gray-600">Humidity: {weatherData.humidity}%</div>
-                <div className="flex items-center justify-center text-sm text-gray-600 mt-1">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  {weatherData.location}
-                </div>
+                {isLoadingWeather ? (
+                  <div className="animate-pulse">
+                    <div className="h-12 w-12 bg-gray-200 rounded-full mx-auto mb-3"></div>
+                    <div className="h-8 w-16 bg-gray-200 rounded mx-auto mb-2"></div>
+                    <div className="h-4 w-24 bg-gray-200 rounded mx-auto"></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-4xl font-bold text-gray-800">{weatherData.temperature}°C</div>
+                    <div className="text-sm text-gray-600">Humidity: {weatherData.humidity}%</div>
+                    <div className="flex items-center justify-center text-sm text-gray-600 mt-1">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {weatherData.location}
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="text-right mb-4">
-                <Sun className="w-12 h-12 text-yellow-500 ml-auto" />
+                {!isLoadingWeather && getWeatherIcon(weatherData.condition)}
               </div>
 
               <div className="border-t pt-4">
