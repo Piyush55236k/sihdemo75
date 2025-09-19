@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/AuthProvider";
 import LandingPage from "./pages/LandingPage";
 import NewHomepage from "./pages/NewHomepage";
-import ResponsiveHomepage from "./pages/ResponsiveHomepage";
+import CleanHomepage from "./pages/CleanHomepage";
 import TestComponent from "./components/TestComponent";
 import Dashboard from "./pages/Dashboard";
 import SoilFertilizerPage from "./pages/SoilFertilizerPage";
@@ -33,7 +33,7 @@ function App() {
         <div>
           {/* <LanguageSelector open={showLangModal} onSelect={handleLangSelect} /> */}
           <Routes>
-            <Route path="/" element={<ResponsiveHomepage />} />
+            <Route path="/" element={<CleanHomepage />} />
             <Route path="/mobile" element={<NewHomepage />} />
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
