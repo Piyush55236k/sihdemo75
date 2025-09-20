@@ -13,7 +13,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { TranslatedText } from "../hooks/useAutoTranslation.jsx";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./AuthProvider_Real";
 import config from "../config/env.js";
 
 const FeedbackForm = ({ isOpen, onClose }) => {

@@ -15,7 +15,7 @@ import {
   CheckCircle,
   Info,
 } from "lucide-react";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./AuthProvider_Real";
 import cropAdvisoryService from "../services/cropAdvisoryService";
 import weatherService from "../services/weatherService";
 import config from "../config/env";

@@ -1,20 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "./AuthProvider";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthProvider_Real";
 import AuthModal from "./AuthModal";
 import { Lock, UserPlus, LogIn, MessageCircle, Star, X } from "lucide-react";
-import { TranslatedText } from "../hooks/useAutoTranslation.jsx";
 
-const AuthGuard = ({ children, feature = "feature", onClose, onAuthSuccess }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+const AuthGuard = ({ children, feature = "feature", onClose, onAuthSuccess, requireComplete = false }) => {
+  const { isAuthenticated, isLoading, isProfileComplete, user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState("login");
+  const navigate = useNavigate();
 
   // Watch for authentication changes
   useEffect(() => {
-    if (isAuthenticated && onAuthSuccess) {
-      onAuthSuccess();
+    if (isAuthenticated) {
+      // Check if profile completion is required
+      if (requireComplete && !isProfileComplete()) {
+        navigate('/profile-setup');
+        return;
+      }
+      
+      if (onAuthSuccess) {
+        onAuthSuccess();
+      }
     }
-  }, [isAuthenticated, onAuthSuccess]);
+  }, [isAuthenticated, isProfileComplete, onAuthSuccess, navigate, requireComplete]);
 
   // Show loading state
   if (isLoading) {
@@ -27,9 +36,22 @@ const AuthGuard = ({ children, feature = "feature", onClose, onAuthSuccess }) =>
     );
   }
 
-  // If authenticated, render the protected component
-  if (isAuthenticated) {
+  // If authenticated and profile is complete (if required), render the protected component
+  if (isAuthenticated && (!requireComplete || isProfileComplete())) {
     return children;
+  }
+
+  // If authenticated but profile incomplete and completion is required
+  if (isAuthenticated && requireComplete && !isProfileComplete()) {
+    // Navigation will be handled by useEffect
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+          <p className="mt-4 text-center">Redirecting to profile setup...</p>
+        </div>
+      </div>
+    );
   }
 
   const getFeatureDetails = () => {
@@ -48,157 +70,155 @@ const AuthGuard = ({ children, feature = "feature", onClose, onAuthSuccess }) =>
       case "feedback":
         return {
           title: "📝 Feedback & Suggestions",
-          description: "Help us improve Agro_Mitra by sharing your experience",
+          description: "Help us improve the platform with your valuable feedback",
           benefits: [
             "Share your farming experiences",
-            "Suggest new features",
-            "Report issues or problems",
-            "Help other farmers learn"
+            "Suggest new features and improvements",
+            "Rate your experience with different tools",
+            "Connect with our development team"
+          ]
+        };
+      case "quests":
+        return {
+          title: "🏆 Farming Quests & Achievements",
+          description: "Complete challenges and earn rewards while learning sustainable farming",
+          benefits: [
+            "Learn new farming techniques through gamification",
+            "Earn points and badges for your achievements",
+            "Track your progress and farming milestones",
+            "Compete with other farmers in your region"
+          ]
+        };
+      case "community":
+        return {
+          title: "👨‍🌾 Farmer Community",
+          description: "Connect with fellow farmers and agricultural experts",
+          benefits: [
+            "Share experiences and learn from others",
+            "Get advice from agricultural experts",
+            "Join local farming groups and discussions",
+            "Access marketplace for equipment and crops"
+          ]
+        };
+      case "profile":
+        return {
+          title: "👤 Personal Farm Profile",
+          description: "Create your personalized farming profile and dashboard",
+          benefits: [
+            "Track your farm details and crop information",
+            "Get personalized recommendations",
+            "Monitor your farming progress and achievements",
+            "Access customized weather and market data"
           ]
         };
       default:
         return {
-          title: "🔒 Premium Feature",
-          description: "Access exclusive farming tools and resources",
+          title: "🌱 Smart Farming Features",
+          description: "Access advanced farming tools and personalized recommendations",
           benefits: [
-            "Advanced farming analytics",
-            "Personalized recommendations",
-            "Community access",
-            "Priority support"
+            "Get weather alerts and forecasts",
+            "Track market prices for your crops",
+            "Receive personalized farming advice",
+            "Connect with the farming community"
           ]
         };
     }
   };
 
-  const featureInfo = getFeatureDetails();
+  const featureDetails = getFeatureDetails();
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // If authenticated, render the protected component
-  if (isAuthenticated) {
-    return children;
-  }
-
-  // If not authenticated, show login prompt
   return (
     <>
-      {/* Authentication Prompt Modal */}
+      {/* Feature Overlay */}
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-8 text-center max-h-[90vh] overflow-y-auto relative">
-          {/* Close Button */}
-          <button
-            onClick={() => {
-              if (onClose) {
-                onClose();
-              }
-            }}
-            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
-            title="Close"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-
-          {/* Icon */}
-          <div className="mb-6">
-            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
-              {feature === "chat" ? (
-                <MessageCircle className="w-10 h-10 text-emerald-600" />
-              ) : (
-                <Lock className="w-10 h-10 text-emerald-600" />
+        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-emerald-500 to-green-600 p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Lock className="w-6 h-6" />
+                <h2 className="text-xl font-bold">Sign In Required</h2>
+              </div>
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="text-white hover:text-gray-200 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               )}
             </div>
           </div>
 
-          {/* Title */}
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">
-            {featureInfo.title}
-          </h2>
+          {/* Content */}
+          <div className="p-6">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                {featureDetails.title}
+              </h3>
+              <p className="text-gray-600 text-sm">
+                {featureDetails.description}
+              </p>
+            </div>
 
-          {/* Description */}
-          <p className="text-gray-600 mb-6 text-lg">
-            {featureInfo.description}
-          </p>
+            {/* Benefits */}
+            <div className="mb-6">
+              <h4 className="font-medium text-gray-800 mb-3 flex items-center">
+                <Star className="w-4 h-4 mr-2 text-yellow-500" />
+                What you'll get:
+              </h4>
+              <ul className="space-y-2">
+                {featureDetails.benefits.map((benefit, index) => (
+                  <li key={index} className="flex items-start space-x-2 text-sm text-gray-600">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></span>
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Benefits List */}
-          <div className="text-left mb-8 space-y-3">
-            <h3 className="text-center font-semibold text-gray-800 mb-4">
-              ✨ What you'll get:
-            </h3>
-            {featureInfo.benefits.map((benefit, index) => (
-              <div key={index} className="flex items-start text-sm text-gray-700">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 mt-2 flex-shrink-0"></div>
-                <span>{benefit}</span>
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center space-x-2"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Sign In to Continue</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  setAuthMode("signup");
+                  setShowAuthModal(true);
+                }}
+                className="w-full border border-emerald-600 text-emerald-600 py-3 rounded-lg font-medium hover:bg-emerald-50 transition-colors flex items-center justify-center space-x-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Create New Account</span>
+              </button>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
+                <MessageCircle className="w-3 h-3" />
+                <span>Join thousands of farmers already using our platform</span>
               </div>
-            ))}
-          </div>
-
-          {/* Call to Action */}
-          <div className="bg-emerald-50 rounded-xl p-4 mb-6">
-            <p className="text-emerald-800 font-medium text-sm">
-              🚀 Join thousands of farmers getting smarter with Agro_Mitra!
-            </p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            {/* Login Button */}
-            <button
-              onClick={() => {
-                setAuthMode("login");
-                setShowAuthModal(true);
-              }}
-              className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-            >
-              <LogIn className="w-5 h-5 mr-3" />
-              <span className="text-lg">
-                Sign In to Continue
-              </span>
-            </button>
-
-            {/* Signup Button */}
-            <button
-              onClick={() => {
-                setAuthMode("signup");
-                setShowAuthModal(true);
-              }}
-              className="w-full bg-white hover:bg-gray-50 text-emerald-600 font-semibold py-4 px-6 rounded-xl border-2 border-emerald-600 transition-all duration-200 flex items-center justify-center hover:shadow-lg transform hover:scale-[1.02]"
-            >
-              <UserPlus className="w-5 h-5 mr-3" />
-              <span className="text-lg">
-                Create Free Account
-              </span>
-            </button>
-
-            {/* Close Button */}
-            <button
-              onClick={() => {
-                if (onClose) {
-                  onClose();
-                }
-              }}
-              className="w-full text-gray-500 hover:text-gray-700 font-medium py-3 transition-colors duration-200 underline"
-            >
-              Maybe Later
-            </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        mode={authMode}
-      />
+      {showAuthModal && (
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          mode={authMode}
+          onModeChange={setAuthMode}
+        />
+      )}
     </>
   );
 };

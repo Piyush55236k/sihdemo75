@@ -1,431 +1,559 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { TranslatedText } from '../hooks/useAutoTranslation.jsx'
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
-  Trophy, 
-  Award, 
+  ArrowLeft, 
   Users, 
   MessageCircle, 
-  ThumbsUp, 
-  Share2,
-  Search,
+  Heart, 
+  Share2, 
+  Plus, 
+  Search, 
   Filter,
-  Star,
-  TrendingUp,
+  Send,
+  Image,
+  Video,
   MapPin,
   Calendar,
-  MessageSquare,
-  Heart,
+  Award,
+  BookOpen,
+  HelpCircle,
+  TrendingUp,
+  Clock,
+  MoreHorizontal,
+  Flag,
   Bookmark,
-  ArrowLeft,
+  ThumbsUp,
   Eye
-} from 'lucide-react'
+} from 'lucide-react';
+import { useAuth } from '../components/AuthProvider';
 
-const CommunityPage = ({ onBack, currentLanguage }) => {
-  const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('leaderboard')
-  const [selectedProfile, setSelectedProfile] = useState(null)
+const CommunityPage = () => {
+  const navigate = useNavigate();
+  const { user, userProfile } = useAuth();
+  const [activeTab, setActiveTab] = useState('feed');
+  const [posts, setPosts] = useState([]);
+  const [newPost, setNewPost] = useState('');
+  const [showNewPost, setShowNewPost] = useState(false);
+  const [filter, setFilter] = useState('all');
+  
+  const tabs = [
+    { id: 'feed', name: 'Feed', icon: MessageCircle },
+    { id: 'questions', name: 'Q&A', icon: HelpCircle },
+    { id: 'experts', name: 'Experts', icon: Award },
+    { id: 'groups', name: 'Groups', icon: Users },
+    { id: 'marketplace', name: 'Marketplace', icon: TrendingUp }
+  ];
 
-  // Handle back button click - use onBack prop if available, otherwise navigate
-  const handleBack = () => {
-    if (onBack && typeof onBack === 'function') {
-      onBack()
-    } else {
-      navigate('/')
-    }
-  }
+  const categories = [
+    'All', 'Crop Care', 'Pest Control', 'Weather', 'Equipment', 'Market', 'Success Stories', 'Questions'
+  ];
 
-  // Mock data - in real app this would come from API
-  const leaderboardData = [
-    {
-      id: 1,
-      name: "Sita Devi",
-      location: "Uttar Pradesh",
-      sustainabilityScore: 95,
-      totalPoints: 2840,
-      level: <TranslatedText>Harvest Master</TranslatedText>,
-      avatar: "S",
-      rank: 1,
-      badges: [<TranslatedText>Soil Health Champion</TranslatedText>, <TranslatedText>Water Warrior</TranslatedText>, <TranslatedText>Solar Champion</TranslatedText>],
-      completedQuests: 28
-    },
-    {
-      id: 2,
-      name: "Amit Kumar",
-      location: "Punjab",
-      sustainabilityScore: 89,
-      totalPoints: 2650,
-      level: <TranslatedText>Harvest Master</TranslatedText>,
-      avatar: "A",
-      rank: 2,
-      badges: [<TranslatedText>Compost King</TranslatedText>, <TranslatedText>Bio Defender</TranslatedText>, <TranslatedText>Rotation Master</TranslatedText>],
-      completedQuests: 25
-    },
-    {
-      id: 3,
-      name: "Priya Sharma",
-      location: "Karnataka",
-      sustainabilityScore: 82,
-      totalPoints: 2340,
-      level: <TranslatedText>Sprout</TranslatedText>,
-      avatar: "P",
-      rank: 3,
-      badges: [<TranslatedText>Mulch Master</TranslatedText>, <TranslatedText>Water Warrior</TranslatedText>],
-      completedQuests: 22
-    },
-    {
-      id: 4,
-      name: "Rajesh Singh",
-      location: "Gujarat",
-      sustainabilityScore: 78,
-      totalPoints: 2180,
-      level: <TranslatedText>Sprout</TranslatedText>,
-      avatar: "R",
-      rank: 4,
-      badges: [<TranslatedText>Mulch Master</TranslatedText>, <TranslatedText>Compost King</TranslatedText>],
-      completedQuests: 20
-    },
-    {
-      id: 5,
-      name: "Ramesh Patel",
-      location: "Gujarat",
-      sustainabilityScore: 75,
-      totalPoints: 1980,
-      level: <TranslatedText>Sprout</TranslatedText>,
-      avatar: "R",
-      rank: 5,
-      badges: [<TranslatedText>Mulch Master</TranslatedText>],
-      completedQuests: 18
-    }
-  ]
+  useEffect(() => {
+    loadPosts();
+  }, []);
 
-  const forumTopics = [
-    {
-      id: 1,
-      title: <TranslatedText>Best practices for organic pest control?</TranslatedText>,
-      author: "Sita Devi",
-      replies: 12,
-      views: 156,
-      lastActivity: <TranslatedText>2 hours ago</TranslatedText>,
-      category: <TranslatedText>Pest Management</TranslatedText>,
-      tags: ["organic", "pest-control", "tips"]
-    },
-    {
-      id: 2,
-      title: <TranslatedText>Drip irrigation system recommendations</TranslatedText>,
-      author: "Amit Kumar",
-      replies: 8,
-      views: 89,
-      lastActivity: <TranslatedText>5 hours ago</TranslatedText>,
-      category: <TranslatedText>Water Management</TranslatedText>,
-      tags: ["irrigation", "water-saving", "equipment"]
-    },
-    {
-      id: 3,
-      title: <TranslatedText>Crop rotation planning for wheat and pulses</TranslatedText>,
-      author: "Priya Sharma",
-      replies: 15,
-      views: 234,
-      lastActivity: <TranslatedText>1 day ago</TranslatedText>,
-      category: <TranslatedText>Crop Management</TranslatedText>,
-      tags: ["crop-rotation", "wheat", "pulses", "planning"]
-    },
-    {
-      id: 4,
-      title: "Solar panel installation experience",
-      author: "Rajesh Singh",
-      replies: 6,
-      views: 67,
-      lastActivity: "2 days ago",
-      category: "Energy",
-      tags: ["solar", "installation", "experience"]
-    },
-    {
-      id: 5,
-      title: <TranslatedText>Composting in hot climate</TranslatedText>,
-      author: "Ramesh Patel",
-      replies: 10,
-      views: 123,
-      lastActivity: <TranslatedText>3 days ago</TranslatedText>,
-      category: <TranslatedText>Soil Health</TranslatedText>,
-      tags: ["composting", "hot-climate", "soil-health"]
-    }
-  ]
+  const loadPosts = () => {
+    // Demo posts data
+    const demoPosts = [
+      {
+        id: '1',
+        user: {
+          name: 'Raj Kumar',
+          avatar: null,
+          location: 'Punjab, India',
+          expertise: 'Wheat Farming',
+          verified: true
+        },
+        content: 'Just harvested my wheat crop! Thanks to the weather alerts, I was able to protect it from the recent rains. Yield increased by 15% this season! 🌾',
+        images: ['/api/placeholder/400/300'],
+        category: 'Success Stories',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        likes: 24,
+        comments: 8,
+        shares: 3,
+        liked: false,
+        bookmarked: false
+      },
+      {
+        id: '2',
+        user: {
+          name: 'Priya Patel',
+          avatar: null,
+          location: 'Gujarat, India',
+          expertise: 'Organic Farming',
+          verified: false
+        },
+        content: 'Has anyone tried the new organic pest control method using neem oil? Looking for advice on dosage and application frequency. #OrganicFarming',
+        category: 'Questions',
+        timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+        likes: 12,
+        comments: 15,
+        shares: 2,
+        liked: true,
+        bookmarked: true
+      },
+      {
+        id: '3',
+        user: {
+          name: 'Dr. Sunita Sharma',
+          avatar: null,
+          location: 'Agricultural Expert',
+          expertise: 'Plant Pathology',
+          verified: true,
+          expert: true
+        },
+        content: 'Important Alert: Brown plant hopper outbreak reported in several districts. Early symptoms include yellowing leaves and stunted growth. Apply recommended insecticides immediately. Link to treatment guide in comments.',
+        category: 'Pest Control',
+        timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+        likes: 45,
+        comments: 22,
+        shares: 18,
+        liked: false,
+        bookmarked: false,
+        pinned: true
+      },
+      {
+        id: '4',
+        user: {
+          name: 'Farmers Collective',
+          avatar: null,
+          location: 'Maharashtra, India',
+          expertise: 'Group Admin',
+          verified: true
+        },
+        content: 'Weather Update: Heavy rainfall expected in Maharashtra next week. Farmers are advised to:\n\n• Ensure proper drainage in fields\n• Postpone fertilizer application\n• Cover harvested crops\n• Check for water-logging\n\nStay safe! 🌧️',
+        category: 'Weather',
+        timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+        likes: 67,
+        comments: 31,
+        shares: 25,
+        liked: true,
+        bookmarked: false
+      },
+      {
+        id: '5',
+        user: {
+          name: 'Amit Singh',
+          avatar: null,
+          location: 'Uttar Pradesh, India',
+          expertise: 'Equipment Specialist',
+          verified: false
+        },
+        content: 'Selling my John Deere tractor (2019 model) - excellent condition, only 1200 hours used. Perfect for medium-sized farms. Serious buyers only. DM for details and price.',
+        category: 'Equipment',
+        timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        likes: 8,
+        comments: 12,
+        shares: 4,
+        liked: false,
+        bookmarked: false
+      }
+    ];
+    
+    setPosts(demoPosts);
+  };
 
-  const getRankClass = (rank) => {
-    if (rank === 1) return 'rank-1'
-    if (rank === 2) return 'rank-2'
-    if (rank === 3) return 'rank-3'
-    return 'rank-other'
-  }
+  const createPost = () => {
+    if (!newPost.trim()) return;
+    
+    const post = {
+      id: Date.now().toString(),
+      user: {
+        name: userProfile?.full_name || user?.name || 'Anonymous',
+        avatar: null,
+        location: userProfile?.farm_address || 'Unknown',
+        expertise: 'Farmer',
+        verified: false
+      },
+      content: newPost,
+      category: 'General',
+      timestamp: new Date().toISOString(),
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      liked: false,
+      bookmarked: false
+    };
+    
+    setPosts([post, ...posts]);
+    setNewPost('');
+    setShowNewPost(false);
+  };
 
-  const getCategoryColor = (category) => {
-    const colors = {
-      'Pest Management': 'bg-purple-100 text-purple-800',
-      'Water Management': 'bg-blue-100 text-blue-800',
-      'Crop Management': 'bg-orange-100 text-orange-800',
-      'Energy': 'bg-yellow-100 text-yellow-800',
-      'Soil Health': 'bg-green-100 text-green-800'
-    }
-    return colors[category] || 'bg-gray-100 text-gray-800'
-  }
+  const toggleLike = (postId) => {
+    setPosts(posts.map(post => 
+      post.id === postId 
+        ? { 
+            ...post, 
+            liked: !post.liked,
+            likes: post.liked ? post.likes - 1 : post.likes + 1
+          }
+        : post
+    ));
+  };
 
-  if (selectedProfile) {
-    const profile = selectedProfile
-    return (
-      <div className="page-transition">
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          {/* Back Button */}
-          <button
-            onClick={() => setSelectedProfile(null)}
-            className="flex items-center text-green-600 hover:text-green-700 mb-6"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            <TranslatedText>Back to Community</TranslatedText>
-          </button>
+  const toggleBookmark = (postId) => {
+    setPosts(posts.map(post => 
+      post.id === postId 
+        ? { ...post, bookmarked: !post.bookmarked }
+        : post
+    ));
+  };
 
-          {/* Profile Header */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all mb-8">
-            <div className="flex items-center space-x-6 mb-6">
-                             <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-green-300 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-3xl">{profile.avatar}</span>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold mb-2">{profile.name}</h1>
-                <div className="flex items-center space-x-4 text-text-light">
-                  <div className="flex items-center">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {profile.location}
-                  </div>
-                  <div className="flex items-center">
-                    <Trophy className="w-4 h-4 mr-2" />
-                    {profile.level}
-                  </div>
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    return `${Math.floor(diff / 86400000)}d ago`;
+  };
+
+  const filteredPosts = posts.filter(post => {
+    if (filter === 'all') return true;
+    return post.category.toLowerCase().includes(filter.toLowerCase());
+  });
+
+  const renderPost = (post) => (
+    <div key={post.id} className={`bg-white rounded-xl shadow-lg p-6 ${post.pinned ? 'border-l-4 border-green-500' : ''}`}>
+      {post.pinned && (
+        <div className="flex items-center text-green-600 text-sm font-medium mb-3">
+          <Award className="w-4 h-4 mr-1" />
+          Pinned Post
+        </div>
+      )}
+      
+      {/* Post Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold">
+              {post.user.name.charAt(0)}
+            </span>
+          </div>
+          
+          <div>
+            <div className="flex items-center space-x-2">
+              <h3 className="font-semibold text-gray-900">{post.user.name}</h3>
+              {post.user.verified && (
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                  post.user.expert ? 'bg-purple-500' : 'bg-blue-500'
+                }`}>
+                  <Award className="w-3 h-3 text-white" />
                 </div>
-              </div>
+              )}
             </div>
-
-            {/* Stats */}
-            <div className="grid md:grid-cols-3 gap-6 mb-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary-green">{profile.sustainabilityScore}%</div>
-                <div className="text-text-light"><TranslatedText>Sustainability Score</TranslatedText></div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-accent-yellow">{profile.totalPoints}</div>
-                <div className="text-text-light"><TranslatedText>Total Points</TranslatedText></div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-accent-orange">{profile.completedQuests}</div>
-                <div className="text-text-light"><TranslatedText>Quests Completed</TranslatedText></div>
-              </div>
-            </div>
-
-            {/* Badges */}
-            <div>
-              <h3 className="text-xl font-semibold mb-4"><TranslatedText>Badges Earned</TranslatedText></h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.badges.map((badge, index) => (
-                  <span key={index} className="badge badge-success">
-                    {badge}
-                  </span>
-                ))}
-              </div>
+            <div className="flex items-center space-x-1 text-sm text-gray-500">
+              <MapPin className="w-3 h-3" />
+              <span>{post.user.location}</span>
+              <span>•</span>
+              <span>{post.user.expertise}</span>
+              <span>•</span>
+              <Clock className="w-3 h-3" />
+              <span>{formatTime(post.timestamp)}</span>
             </div>
           </div>
         </div>
-      </div>
-    )
-  }
-
-  return (
-  <div className="animate-fade-in">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Back Button */}
-        <button
-          onClick={handleBack}
-          className="flex items-center text-emerald-600 hover:text-emerald-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          <TranslatedText>Back to Home</TranslatedText>
+        
+        <button className="p-2 hover:bg-gray-100 rounded-lg">
+          <MoreHorizontal className="w-5 h-5 text-gray-400" />
         </button>
+      </div>
 
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-text-dark mb-4"><TranslatedText>Community Hub</TranslatedText></h1>
-          <p className="text-xl text-text-light max-w-2xl mx-auto">
-            <TranslatedText>Connect with fellow farmers, share knowledge, and celebrate achievements together.</TranslatedText>
-          </p>
-        </div>
+      {/* Category Tag */}
+      <div className="mb-3">
+        <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">
+          {post.category}
+        </span>
+      </div>
 
-        {/* Tab Navigation */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-lg p-1 shadow-sm border border-border-light">
-            <button
-              onClick={() => setActiveTab('leaderboard')}
-              className={`px-6 py-3 rounded-md font-medium transition-colors ${
-                activeTab === 'leaderboard'
-                  ? 'bg-primary-green text-white'
-                  : 'text-text-light hover:text-primary-green'
-              }`}
-            >
-              <Trophy className="w-5 h-5 inline mr-2" />
-              <TranslatedText>Leaderboard</TranslatedText>
-            </button>
-            <button
-              onClick={() => setActiveTab('forums')}
-              className={`px-6 py-3 rounded-md font-medium transition-colors ${
-                activeTab === 'forums'
-                  ? 'bg-primary-green text-white'
-                  : 'text-text-light hover:text-primary-green'
-              }`}
-            >
-              <MessageCircle className="w-5 h-5 inline mr-2" />
-              <TranslatedText>Forums</TranslatedText>
-            </button>
-          </div>
-        </div>
-
-        {/* Leaderboard Tab */}
-        {activeTab === 'leaderboard' && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold"><TranslatedText>Top Farmers</TranslatedText></h2>
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-text-light" />
-                  <input
-                    type="text"
-                    placeholder="Search farmers..."
-                    className="pl-10 pr-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent"
-                  />
-                </div>
-                                 <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold transition-colors inline-flex items-center">
-                   <Filter className="w-4 h-2 mr-2" />
-                   Filter
-                 </button>
+      {/* Post Content */}
+      <div className="mb-4">
+        <p className="text-gray-800 whitespace-pre-line">{post.content}</p>
+        
+        {post.images && (
+          <div className="mt-3 grid grid-cols-1 gap-2">
+            {post.images.map((image, index) => (
+              <div key={index} className="rounded-lg overflow-hidden">
+                <img 
+                  src={image} 
+                  alt="Post content" 
+                  className="w-full h-48 object-cover bg-gray-200"
+                />
               </div>
-            </div>
-
-            <div className="space-y-4">
-              {leaderboardData.map((farmer) => (
-                <div
-                  key={farmer.id}
-                  className="leaderboard-item cursor-pointer"
-                  onClick={() => setSelectedProfile(farmer)}
-                >
-                  <div className={`leaderboard-rank ${getRankClass(farmer.rank)}`}>
-                    {farmer.rank}
-                  </div>
-                                     <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-300 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-white font-semibold">{farmer.avatar}</span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{farmer.name}</h3>
-                    <div className="flex items-center space-x-4 text-sm text-text-light">
-                      <span>{farmer.location}</span>
-                      <span>•</span>
-                      <span>{farmer.level}</span>
-                      <span>•</span>
-                      <span>{farmer.completedQuests} quests</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-green-600">{farmer.sustainabilityScore}%</div>
-                    <div className="text-sm text-text-light">{farmer.totalPoints} pts</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         )}
+      </div>
 
-        {/* Forums Tab */}
-        {activeTab === 'forums' && (
-          <div className="space-y-6">
-            {/* Create New Topic */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all">
-              <div className="flex items-center space-x-4">
-                                 <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-300 rounded-full flex items-center justify-center">
-                  <MessageSquare className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    placeholder="Start a new discussion..."
-                    className="w-full px-4 py-3 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent"
-                  />
-                </div>
-                                 <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors inline-flex items-center">
-                   <MessageSquare className="w-5 h-5 mr-2" />
-                   Post
-                 </button>
-              </div>
-            </div>
-
-            {/* Forum Topics */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Recent Discussions</h2>
-                <div className="flex items-center space-x-2">
-                                     <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold transition-colors inline-flex items-center">
-                     <TrendingUp className="w-4 h-4 mr-2" />
-                     Trending
-                   </button>
-                   <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold transition-colors inline-flex items-center">
-                     <Calendar className="w-4 h-4 mr-2" />
-                     Latest
-                   </button>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {forumTopics.map((topic) => (
-                  <div key={topic.id} className="border border-border-light rounded-lg p-4 hover:bg-bg-light transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(topic.category)}`}>
-                            {topic.category}
-                          </span>
-                          <span className="text-sm text-text-light">by {topic.author}</span>
-                        </div>
-                                                 <h3 className="text-lg font-semibold mb-2 cursor-pointer hover:text-green-600">
-                          {topic.title}
-                        </h3>
-                        <div className="flex items-center space-x-4 text-sm text-text-light">
-                          <span className="flex items-center">
-                            <MessageCircle className="w-4 h-4 mr-1" />
-                            {topic.replies} replies
-                          </span>
-                          <span className="flex items-center">
-                            <Eye className="w-4 h-4 mr-1" />
-                            {topic.views} views
-                          </span>
-                          <span>{topic.lastActivity}</span>
-                        </div>
-                      </div>
-                                             <div className="flex items-center space-x-2">
-                         <button className="p-2 text-gray-600 hover:text-green-600 rounded-lg hover:bg-green-50">
-                           <Heart className="w-5 h-5" />
-                         </button>
-                         <button className="p-2 text-gray-600 hover:text-green-600 rounded-lg hover:bg-green-50">
-                           <Bookmark className="w-5 h-5" />
-                         </button>
-                         <button className="p-2 text-gray-600 hover:text-green-600 rounded-lg hover:bg-green-50">
-                           <Share2 className="w-5 h-5" />
-                         </button>
-                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+      {/* Post Actions */}
+      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        <div className="flex items-center space-x-6">
+          <button
+            onClick={() => toggleLike(post.id)}
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+              post.liked ? 'bg-red-50 text-red-600' : 'hover:bg-gray-50 text-gray-600'
+            }`}
+          >
+            <Heart className={`w-5 h-5 ${post.liked ? 'fill-current' : ''}`} />
+            <span className="font-medium">{post.likes}</span>
+          </button>
+          
+          <button className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-600">
+            <MessageCircle className="w-5 h-5" />
+            <span className="font-medium">{post.comments}</span>
+          </button>
+          
+          <button className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-600">
+            <Share2 className="w-5 h-5" />
+            <span className="font-medium">{post.shares}</span>
+          </button>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => toggleBookmark(post.id)}
+            className={`p-2 rounded-lg transition-colors ${
+              post.bookmarked ? 'bg-yellow-50 text-yellow-600' : 'hover:bg-gray-50 text-gray-400'
+            }`}
+          >
+            <Bookmark className={`w-5 h-5 ${post.bookmarked ? 'fill-current' : ''}`} />
+          </button>
+          
+          <button className="p-2 rounded-lg hover:bg-gray-50 text-gray-400">
+            <Flag className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </div>
-  )
-}
+  );
 
-export default CommunityPage
+  const renderNewPostForm = () => (
+    <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div className="flex items-center space-x-3 mb-4">
+        <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+          <span className="text-white font-bold">
+            {userProfile?.full_name?.charAt(0) || user?.name?.charAt(0) || 'U'}
+          </span>
+        </div>
+        <div className="flex-1">
+          <textarea
+            value={newPost}
+            onChange={(e) => setNewPost(e.target.value)}
+            placeholder="Share your farming experience, ask questions, or help fellow farmers..."
+            className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-green-500"
+            rows="3"
+          />
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-between">
+        <div className="flex space-x-4">
+          <button className="flex items-center space-x-2 text-gray-600 hover:text-green-600">
+            <Image className="w-5 h-5" />
+            <span>Photo</span>
+          </button>
+          <button className="flex items-center space-x-2 text-gray-600 hover:text-green-600">
+            <Video className="w-5 h-5" />
+            <span>Video</span>
+          </button>
+          <button className="flex items-center space-x-2 text-gray-600 hover:text-green-600">
+            <MapPin className="w-5 h-5" />
+            <span>Location</span>
+          </button>
+        </div>
+        
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowNewPost(false)}
+            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={createPost}
+            disabled={!newPost.trim()}
+            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          >
+            <Send className="w-4 h-4 mr-2" />
+            Post
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderFeed = () => (
+    <div>
+      {/* Create Post Button */}
+      {!showNewPost && (
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <button
+            onClick={() => setShowNewPost(true)}
+            className="w-full flex items-center space-x-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold">
+                {userProfile?.full_name?.charAt(0) || user?.name?.charAt(0) || 'U'}
+              </span>
+            </div>
+            <span className="text-gray-600">Share your farming experience...</span>
+          </button>
+        </div>
+      )}
+
+      {/* New Post Form */}
+      {showNewPost && renderNewPostForm()}
+
+      {/* Filters */}
+      <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-800">Filter Posts</h3>
+          <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+            Clear Filters
+          </button>
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          {categories.map(category => (
+            <button
+              key={category}
+              onClick={() => setFilter(category.toLowerCase())}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filter === category.toLowerCase() || (filter === 'all' && category === 'All')
+                  ? 'bg-green-500 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Posts */}
+      <div className="space-y-6">
+        {filteredPosts.map(renderPost)}
+      </div>
+    </div>
+  );
+
+  const renderQuestions = () => (
+    <div className="text-center py-12">
+      <HelpCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+      <h3 className="text-xl font-semibold text-gray-600 mb-2">Q&A Section</h3>
+      <p className="text-gray-500 mb-6">Ask questions and get expert answers</p>
+      <button className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
+        Ask a Question
+      </button>
+    </div>
+  );
+
+  const renderExperts = () => (
+    <div className="text-center py-12">
+      <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+      <h3 className="text-xl font-semibold text-gray-600 mb-2">Expert Network</h3>
+      <p className="text-gray-500 mb-6">Connect with agricultural experts</p>
+      <button className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
+        Browse Experts
+      </button>
+    </div>
+  );
+
+  const renderGroups = () => (
+    <div className="text-center py-12">
+      <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+      <h3 className="text-xl font-semibold text-gray-600 mb-2">Farmer Groups</h3>
+      <p className="text-gray-500 mb-6">Join local farming communities</p>
+      <button className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
+        Join Groups
+      </button>
+    </div>
+  );
+
+  const renderMarketplace = () => (
+    <div className="text-center py-12">
+      <TrendingUp className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+      <h3 className="text-xl font-semibold text-gray-600 mb-2">Marketplace</h3>
+      <p className="text-gray-500 mb-6">Buy and sell farming equipment</p>
+      <button className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
+        Browse Marketplace
+      </button>
+    </div>
+  );
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'feed': return renderFeed();
+      case 'questions': return renderQuestions();
+      case 'experts': return renderExperts();
+      case 'groups': return renderGroups();
+      case 'marketplace': return renderMarketplace();
+      default: return renderFeed();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="mr-4 p-2 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+              <Users className="w-6 h-6 mr-2" />
+              Farmer Community
+            </h1>
+            <p className="text-gray-600">Connect, share, and learn together</p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <div className="relative">
+            <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search posts, farmers..."
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
+        <div className="flex space-x-1 overflow-x-auto">
+          {tabs.map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-green-500 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span>{tab.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      {renderTabContent()}
+    </div>
+  );
+};
+
+export default CommunityPage;

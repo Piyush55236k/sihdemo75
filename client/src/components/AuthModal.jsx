@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useAuth } from './AuthProvider'
+import { useAuth } from './AuthProvider_Real'
 import { TranslatedText } from '../hooks/useAutoTranslation.jsx'
 import { 
   Phone, 

@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "../components/AuthProvider";
+import { useAuth } from "../components/AuthProvider_Real";
 import { LogOut, User, Shield, CheckCircle } from "lucide-react";
 import { TranslatedText } from "../hooks/useAutoTranslation.jsx";
 

@@ -12,7 +12,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./AuthProvider_Real";
 import config from "../config/env";
 
 const ChatBot = ({ isOpen, onClose }) => {

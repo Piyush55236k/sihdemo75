@@ -17,7 +17,7 @@ import PestCheckPage from './PestCheckPage';
 import MarketPricesPage from './MarketPricesPage';
 import CropCalendarPage from './CropCalendarPage';
 import QuestPage from './QuestPage';
-import { useAuth } from '../components/AuthProvider';
+import { useAuth } from '../components/AuthProvider_Real';
 import WeatherService from '../services/weatherService';
 
 const CleanHomepage = () => {
@@ -50,14 +50,14 @@ const CleanHomepage = () => {
               const { latitude, longitude } = position.coords;
               try {
                 const weather = await weatherService.getCurrentWeather(latitude, longitude);
-                const forecast = await weatherService.getForecast(latitude, longitude, 4);
+                const forecast = await weatherService.getWeatherForecast(latitude, longitude);
                 
                 setWeatherData({
                   temperature: Math.round(weather.temperature),
                   humidity: weather.humidity,
                   location: weather.location,
                   condition: weather.condition,
-                  forecast: forecast.slice(0, 4)
+                  forecast: forecast.forecast ? forecast.forecast.slice(0, 4) : []
                 });
               } catch (error) {
                 console.error('Error fetching weather:', error);
@@ -86,14 +86,14 @@ const CleanHomepage = () => {
       try {
         // Default to Ahmedabad coordinates
         const weather = await weatherService.getCurrentWeather(23.0225, 72.5714);
-        const forecast = await weatherService.getForecast(23.0225, 72.5714, 4);
+        const forecast = await weatherService.getWeatherForecast(23.0225, 72.5714);
         
         setWeatherData({
           temperature: Math.round(weather.temperature),
           humidity: weather.humidity,
           location: weather.location || 'Ahmedabad, Gujarat',
           condition: weather.condition,
-          forecast: forecast.slice(0, 4)
+          forecast: forecast.forecast ? forecast.forecast.slice(0, 4) : []
         });
       } catch (error) {
         console.error('Default weather error:', error);
@@ -272,7 +272,7 @@ const CleanHomepage = () => {
                 FAQ
               </button>
               <button 
-                onClick={() => handleNavigation('community')}
+                onClick={() => window.location.href = '/community'}
                 className="text-gray-700 hover:text-green-600 font-medium"
               >
                 COMMUNITY
@@ -290,10 +290,46 @@ const CleanHomepage = () => {
               <div className="flex items-center space-x-2 bg-green-100 px-3 py-1 rounded-full">
                 <span className="text-green-600 font-medium">50</span>
               </div>
-              <Bell className="w-6 h-6 text-gray-600" />
+              <button 
+                onClick={() => window.location.href = '/notifications'}
+                className="relative"
+              >
+                <Bell className="w-6 h-6 text-gray-600" />
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+              </button>
               {isAuthenticated ? (
-                <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
+                <div className="relative group">
+                  <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center cursor-pointer">
+                    <User className="w-5 h-5 text-white" />
+                  </div>
+                  {/* Dropdown Menu */}
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <button 
+                      onClick={() => window.location.href = '/dashboard'}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
+                    >
+                      Dashboard
+                    </button>
+                    <button 
+                      onClick={() => window.location.href = '/profile-setup'}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
+                    >
+                      Profile Setup
+                    </button>
+                    <button 
+                      onClick={() => window.location.href = '/settings'}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
+                    >
+                      Settings
+                    </button>
+                    <hr className="my-1" />
+                    <button 
+                      onClick={() => {/* handle logout */}}
+                      className="block px-4 py-2 text-red-600 hover:bg-gray-100 w-full text-left"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button 

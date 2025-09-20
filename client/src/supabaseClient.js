@@ -19,4 +19,11 @@ console.log('Supabase config:', {
   hasKey: !!SUPABASE_ANON_KEY
 });
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    // Disable email confirmation in development
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+});

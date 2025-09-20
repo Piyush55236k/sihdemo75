@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { MessageCircle, X, FileText } from "lucide-react";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./AuthProvider_Real";
 import ChatBot from "./ChatBot";
 import FeedbackForm from "./FeedbackForm";
 import AuthGuard from "./AuthGuard";
