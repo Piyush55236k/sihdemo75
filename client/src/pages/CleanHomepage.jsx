@@ -70,16 +70,24 @@ const CleanHomepage = () => {
     const ro = new ResizeObserver(computePages);
     ro.observe(el);
 
+    let snapTimer = null;
     const onScroll = () => {
       const visibleWidth = el.clientWidth;
       const page = Math.round(el.scrollLeft / visibleWidth);
       setCurrentProductsPage(page);
+      // Debounce snap after user stops scrolling
+      if (snapTimer) clearTimeout(snapTimer);
+      snapTimer = setTimeout(() => {
+        const nearest = Math.round(el.scrollLeft / visibleWidth);
+        el.scrollTo({ left: nearest * visibleWidth, behavior: 'smooth' });
+      }, 120);
     };
     el.addEventListener('scroll', onScroll, { passive: true });
 
     return () => {
       try { ro.disconnect(); } catch {}
       el.removeEventListener('scroll', onScroll);
+      if (snapTimer) clearTimeout(snapTimer);
     };
   }, [selectedCategory]);
 
@@ -89,6 +97,19 @@ const CleanHomepage = () => {
     const left = pageIndex * el.clientWidth;
     el.scrollTo({ left, behavior: 'smooth' });
     setCurrentProductsPage(pageIndex);
+  };
+
+  // Keyboard navigation for accessibility
+  const onProductsKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prev = Math.max(0, currentProductsPage - 1);
+      scrollToProductsPage(prev);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const next = Math.min(productsPagesCount - 1, currentProductsPage + 1);
+      scrollToProductsPage(next);
+    }
   };
 
   // Initialize weather service
@@ -870,7 +891,14 @@ const CleanHomepage = () => {
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
-                <div ref={productsCarouselRef} className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 no-scrollbar">
+                <div
+                  ref={productsCarouselRef}
+                  className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 no-scrollbar"
+                  tabIndex={0}
+                  role="region"
+                  aria-label="Products slider"
+                  onKeyDown={onProductsKeyDown}
+                >
                   {getFilteredProducts().slice(0, 12).map((product) => (
                     <div key={product.id} className="min-w-[240px] max-w-[240px] bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300 snap-start overflow-hidden">
                       <div className="relative">
@@ -910,8 +938,10 @@ const CleanHomepage = () => {
                     <button
                       key={i}
                       aria-label={`Go to page ${i + 1}`}
-                      className={`h-2 w-2 rounded-full ${
-                        i === currentProductsPage ? 'bg-green-600' : 'bg-green-200'
+                      className={`h-2 w-2 rounded-full transition-all duration-200 ${
+                        i === currentProductsPage
+                          ? 'bg-green-600 scale-125 shadow-[0_0_0_3px_rgba(34,197,94,0.15)]'
+                          : 'bg-green-200 hover:bg-green-300'
                       }`}
                       onClick={() => scrollToProductsPage(i)}
                     />
