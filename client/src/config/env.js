@@ -98,6 +98,8 @@ const config = {
     baseUrl: import.meta.env.VITE_WEATHER_BASE_URL || 'https://api.weatherapi.com/v1',
     timeout: parseInt(import.meta.env.VITE_WEATHER_TIMEOUT) || 10000,
     enableRealAPI: import.meta.env.VITE_ENABLE_REAL_WEATHER_API === 'true' || !!import.meta.env.VITE_WEATHER_API_KEY,
+    // Force demo irrespective of key (useful for demos)
+    forceDemo: import.meta.env.VITE_FORCE_WEATHER_DEMO === 'true',
   },
 
   // Contact Information

@@ -114,7 +114,7 @@ const CleanHomepage = () => {
 
   // Initialize weather service
   const weatherService = new WeatherService();
-  const isWeatherDemo = weatherService.isDemoMode;
+  const [isWeatherDemo, setIsWeatherDemo] = useState(weatherService.isDemoMode);
 
   // Shop product data
   const products = [
@@ -431,6 +431,30 @@ const CleanHomepage = () => {
     return <Sun className="w-12 h-12 text-yellow-500" />;
   };
 
+  // Background styles for weather card based on condition
+  const getWeatherBgClasses = (condition) => {
+    const cond = (condition || '').toLowerCase();
+    if (cond.includes('sunny') || cond.includes('clear')) {
+      return 'bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-100 border-amber-200';
+    }
+    if (cond.includes('cloud')) {
+      return 'bg-gradient-to-br from-slate-50 via-sky-50 to-blue-50 border-sky-200';
+    }
+    if (cond.includes('rain') || cond.includes('drizzle')) {
+      return 'bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 border-blue-200';
+    }
+    if (cond.includes('thunder') || cond.includes('storm')) {
+      return 'bg-gradient-to-br from-gray-50 via-slate-100 to-yellow-50 border-gray-200';
+    }
+    if (cond.includes('snow')) {
+      return 'bg-gradient-to-br from-sky-50 via-white to-blue-50 border-sky-200';
+    }
+    if (cond.includes('mist') || cond.includes('fog') || cond.includes('haze')) {
+      return 'bg-gradient-to-br from-gray-50 via-emerald-50 to-lime-50 border-gray-200';
+    }
+    return 'bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 border-green-200';
+  };
+
   // Helpers for forecast rendering
   const getForecastDayLabel = (item, index) => {
     if (!item) return "--";
@@ -558,16 +582,18 @@ const CleanHomepage = () => {
   const handleRefreshWeather = async () => {
     try {
       setIsLoadingWeather(true);
-      const loc = await weatherService.getCurrentLocation();
-      const weather = await weatherService.getCurrentWeather(
+      // Recreate service to pick up latest demo toggle
+      const svc = new WeatherService();
+      const loc = await svc.getCurrentLocation();
+      const weather = await svc.getCurrentWeather(
         loc.latitude,
         loc.longitude
       );
-      const forecast = await weatherService.getWeatherForecast(
+      const forecast = await svc.getWeatherForecast(
         loc.latitude,
         loc.longitude
       );
-      const alerts = await weatherService.getWeatherAlerts(
+      const alerts = await svc.getWeatherAlerts(
         loc.latitude,
         loc.longitude
       );
@@ -583,6 +609,19 @@ const CleanHomepage = () => {
       console.error("Refresh weather failed", e);
     } finally {
       setIsLoadingWeather(false);
+    }
+  };
+
+  // Toggle weather demo mode and refresh
+  const handleToggleWeatherDemo = async () => {
+    try {
+      const current = (() => { try { return localStorage.getItem('forceWeatherDemo') === 'true'; } catch { return false; } })();
+      const next = !current;
+      try { localStorage.setItem('forceWeatherDemo', next ? 'true' : 'false'); } catch {}
+      setIsWeatherDemo(next || new WeatherService().isDemoMode);
+      await handleRefreshWeather();
+    } catch (err) {
+      console.error('Toggle weather demo failed', err);
     }
   };
 
@@ -956,7 +995,7 @@ const CleanHomepage = () => {
 
           {/* Right Side - Weather Widget */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className={`rounded-lg shadow-sm p-6 mb-6 border ${getWeatherBgClasses(weatherData.condition)}`}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-800">Weather</h3>
                 <div className="flex items-center space-x-2">
@@ -965,6 +1004,13 @@ const CleanHomepage = () => {
                       Demo
                     </span>
                   )}
+                  <button
+                    onClick={handleToggleWeatherDemo}
+                    className="text-xs px-2 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100"
+                    title={isWeatherDemo ? 'Switch to Live API' : 'Force Demo Data'}
+                  >
+                    {isWeatherDemo ? 'Use Live' : 'Use Demo'}
+                  </button>
                   <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
                     {weatherData.condition || "--"}
                   </span>

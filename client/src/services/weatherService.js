@@ -7,7 +7,12 @@ class WeatherService {
     this.API_KEY = config.weather?.apiKey || 'demo_key';
     this.BASE_URL = config.weather?.baseUrl || 'https://api.weatherapi.com/v1';
     this.TIMEOUT = config.weather?.timeout || 10000;
-    this.isDemoMode = this.API_KEY === 'demo_key' || !config.weather?.enableRealAPI;
+    // Determine demo mode: forced via env or localStorage, or lack of real API enablement
+    const forcedDemoEnv = !!config.weather?.forceDemo;
+    const forcedDemoLocal = (() => {
+      try { return localStorage.getItem('forceWeatherDemo') === 'true'; } catch { return false; }
+    })();
+    this.isDemoMode = forcedDemoEnv || forcedDemoLocal || this.API_KEY === 'demo_key' || !config.weather?.enableRealAPI;
     
     // Debug logging
     console.log('🔍 Weather config values:');
@@ -31,7 +36,7 @@ class WeatherService {
    */
   async getCurrentWeather(latitude, longitude) {
     try {
-      if (this.API_KEY === 'demo_key') {
+      if (this.isDemoMode) {
         // Demo mode - return mock data
         console.log('🌤️ DEMO MODE: Using mock weather data for', { latitude, longitude });
         return this.getMockWeatherData(latitude, longitude);
@@ -86,7 +91,7 @@ class WeatherService {
    */
   async getWeatherForecast(latitude, longitude) {
     try {
-      if (this.API_KEY === 'demo_key') {
+      if (this.isDemoMode) {
         return this.getMockForecastData(latitude, longitude);
       }
 
@@ -146,8 +151,8 @@ class WeatherService {
   async getWeatherAlerts(latitude, longitude) {
     try {
       console.log('🚨 Fetching weather alerts for:', { latitude, longitude });
-      
-      if (this.API_KEY === 'demo_key') {
+
+      if (this.isDemoMode) {
         console.log('🚨 DEMO MODE: Using mock alerts data');
         return this.getMockAlertsData(latitude, longitude);
       }
