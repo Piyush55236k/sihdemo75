@@ -9,6 +9,13 @@ class WeatherService {
     this.TIMEOUT = config.weather?.timeout || 10000;
     this.isDemoMode = this.API_KEY === 'demo_key' || !config.weather?.enableRealAPI;
     
+    // Debug logging
+    console.log('🔍 Weather config values:');
+    console.log('  API Key:', this.API_KEY.substring(0, 8) + '...');
+    console.log('  Base URL:', this.BASE_URL);
+    console.log('  Demo Mode:', this.isDemoMode);
+    console.log('  Enable Real API:', config.weather?.enableRealAPI);
+    
     if (this.isDemoMode) {
       console.log('🌤️ WeatherService initialized in DEMO MODE');
     } else {
@@ -138,11 +145,15 @@ class WeatherService {
    */
   async getWeatherAlerts(latitude, longitude) {
     try {
+      console.log('🚨 Fetching weather alerts for:', { latitude, longitude });
+      
       if (this.API_KEY === 'demo_key') {
+        console.log('🚨 DEMO MODE: Using mock alerts data');
         return this.getMockAlertsData(latitude, longitude);
       }
 
       const url = `${this.BASE_URL}/forecast.json?key=${this.API_KEY}&q=${latitude},${longitude}&days=1&aqi=no&alerts=yes`;
+      console.log('🌐 Making alerts API call to WeatherAPI.com...');
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.TIMEOUT);
@@ -151,15 +162,22 @@ class WeatherService {
       clearTimeout(timeoutId);
       
       if (!response.ok) {
+        console.error('❌ Weather Alerts API error:', response.status, response.statusText);
         throw new Error(`Weather Alerts API error: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('✅ Weather alerts API response:', data.alerts);
       
-      return this.formatAlerts(data.alerts?.alert || []);
+      const apiAlerts = data.alerts?.alert || [];
+      const enhancedAlerts = this.enhanceAlertsWithFarmingAdvice(apiAlerts, latitude, longitude);
+      
+      console.log('🚨 Final alerts to display:', enhancedAlerts);
+      return enhancedAlerts;
       
     } catch (error) {
       console.error('❌ Weather Alerts API error:', error);
+      console.log('🔄 Falling back to mock alerts data');
       return this.getMockAlertsData(latitude, longitude);
     }
   }

@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Users, 
-  MessageCircle, 
-  Heart, 
-  Share2, 
-  Plus, 
-  Search, 
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Users,
+  MessageCircle,
+  Heart,
+  Share2,
+  Plus,
+  Search,
   Filter,
   Send,
   Image,
@@ -23,29 +23,36 @@ import {
   Flag,
   Bookmark,
   ThumbsUp,
-  Eye
-} from 'lucide-react';
-import { useAuth } from '../components/AuthProvider';
+  Eye,
+} from "lucide-react";
+import { useAuth } from "../components/AuthProvider_Real";
 
-const CommunityPage = () => {
+const CommunityPage = ({ onBack, currentLanguage = "en" }) => {
   const navigate = useNavigate();
   const { user, userProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState('feed');
+  const [activeTab, setActiveTab] = useState("feed");
   const [posts, setPosts] = useState([]);
-  const [newPost, setNewPost] = useState('');
+  const [newPost, setNewPost] = useState("");
   const [showNewPost, setShowNewPost] = useState(false);
-  const [filter, setFilter] = useState('all');
-  
+  const [filter, setFilter] = useState("all");
+
   const tabs = [
-    { id: 'feed', name: 'Feed', icon: MessageCircle },
-    { id: 'questions', name: 'Q&A', icon: HelpCircle },
-    { id: 'experts', name: 'Experts', icon: Award },
-    { id: 'groups', name: 'Groups', icon: Users },
-    { id: 'marketplace', name: 'Marketplace', icon: TrendingUp }
+    { id: "feed", name: "Feed", icon: MessageCircle },
+    { id: "questions", name: "Q&A", icon: HelpCircle },
+    { id: "experts", name: "Experts", icon: Award },
+    { id: "groups", name: "Groups", icon: Users },
+    { id: "marketplace", name: "Marketplace", icon: TrendingUp },
   ];
 
   const categories = [
-    'All', 'Crop Care', 'Pest Control', 'Weather', 'Equipment', 'Market', 'Success Stories', 'Questions'
+    "All",
+    "Crop Care",
+    "Pest Control",
+    "Weather",
+    "Equipment",
+    "Market",
+    "Success Stories",
+    "Questions",
   ];
 
   useEffect(() => {
@@ -56,175 +63,187 @@ const CommunityPage = () => {
     // Demo posts data
     const demoPosts = [
       {
-        id: '1',
+        id: "1",
         user: {
-          name: 'Raj Kumar',
+          name: "Raj Kumar",
           avatar: null,
-          location: 'Punjab, India',
-          expertise: 'Wheat Farming',
-          verified: true
+          location: "Punjab, India",
+          expertise: "Wheat Farming",
+          verified: true,
         },
-        content: 'Just harvested my wheat crop! Thanks to the weather alerts, I was able to protect it from the recent rains. Yield increased by 15% this season! 🌾',
-        images: ['/api/placeholder/400/300'],
-        category: 'Success Stories',
+        content:
+          "Just harvested my wheat crop! Thanks to the weather alerts, I was able to protect it from the recent rains. Yield increased by 15% this season! 🌾",
+        images: ["/api/placeholder/400/300"],
+        category: "Success Stories",
         timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
         likes: 24,
         comments: 8,
         shares: 3,
         liked: false,
-        bookmarked: false
+        bookmarked: false,
       },
       {
-        id: '2',
+        id: "2",
         user: {
-          name: 'Priya Patel',
+          name: "Priya Patel",
           avatar: null,
-          location: 'Gujarat, India',
-          expertise: 'Organic Farming',
-          verified: false
+          location: "Gujarat, India",
+          expertise: "Organic Farming",
+          verified: false,
         },
-        content: 'Has anyone tried the new organic pest control method using neem oil? Looking for advice on dosage and application frequency. #OrganicFarming',
-        category: 'Questions',
+        content:
+          "Has anyone tried the new organic pest control method using neem oil? Looking for advice on dosage and application frequency. #OrganicFarming",
+        category: "Questions",
         timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
         likes: 12,
         comments: 15,
         shares: 2,
         liked: true,
-        bookmarked: true
+        bookmarked: true,
       },
       {
-        id: '3',
+        id: "3",
         user: {
-          name: 'Dr. Sunita Sharma',
+          name: "Dr. Sunita Sharma",
           avatar: null,
-          location: 'Agricultural Expert',
-          expertise: 'Plant Pathology',
+          location: "Agricultural Expert",
+          expertise: "Plant Pathology",
           verified: true,
-          expert: true
+          expert: true,
         },
-        content: 'Important Alert: Brown plant hopper outbreak reported in several districts. Early symptoms include yellowing leaves and stunted growth. Apply recommended insecticides immediately. Link to treatment guide in comments.',
-        category: 'Pest Control',
+        content:
+          "Important Alert: Brown plant hopper outbreak reported in several districts. Early symptoms include yellowing leaves and stunted growth. Apply recommended insecticides immediately. Link to treatment guide in comments.",
+        category: "Pest Control",
         timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
         likes: 45,
         comments: 22,
         shares: 18,
         liked: false,
         bookmarked: false,
-        pinned: true
+        pinned: true,
       },
       {
-        id: '4',
+        id: "4",
         user: {
-          name: 'Farmers Collective',
+          name: "Farmers Collective",
           avatar: null,
-          location: 'Maharashtra, India',
-          expertise: 'Group Admin',
-          verified: true
+          location: "Maharashtra, India",
+          expertise: "Group Admin",
+          verified: true,
         },
-        content: 'Weather Update: Heavy rainfall expected in Maharashtra next week. Farmers are advised to:\n\n• Ensure proper drainage in fields\n• Postpone fertilizer application\n• Cover harvested crops\n• Check for water-logging\n\nStay safe! 🌧️',
-        category: 'Weather',
+        content:
+          "Weather Update: Heavy rainfall expected in Maharashtra next week. Farmers are advised to:\n\n• Ensure proper drainage in fields\n• Postpone fertilizer application\n• Cover harvested crops\n• Check for water-logging\n\nStay safe! 🌧️",
+        category: "Weather",
         timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
         likes: 67,
         comments: 31,
         shares: 25,
         liked: true,
-        bookmarked: false
+        bookmarked: false,
       },
       {
-        id: '5',
+        id: "5",
         user: {
-          name: 'Amit Singh',
+          name: "Amit Singh",
           avatar: null,
-          location: 'Uttar Pradesh, India',
-          expertise: 'Equipment Specialist',
-          verified: false
+          location: "Uttar Pradesh, India",
+          expertise: "Equipment Specialist",
+          verified: false,
         },
-        content: 'Selling my John Deere tractor (2019 model) - excellent condition, only 1200 hours used. Perfect for medium-sized farms. Serious buyers only. DM for details and price.',
-        category: 'Equipment',
+        content:
+          "Selling my John Deere tractor (2019 model) - excellent condition, only 1200 hours used. Perfect for medium-sized farms. Serious buyers only. DM for details and price.",
+        category: "Equipment",
         timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
         likes: 8,
         comments: 12,
         shares: 4,
         liked: false,
-        bookmarked: false
-      }
+        bookmarked: false,
+      },
     ];
-    
+
     setPosts(demoPosts);
   };
 
   const createPost = () => {
     if (!newPost.trim()) return;
-    
+
     const post = {
       id: Date.now().toString(),
       user: {
-        name: userProfile?.full_name || user?.name || 'Anonymous',
+        name: userProfile?.full_name || user?.name || "Anonymous",
         avatar: null,
-        location: userProfile?.farm_address || 'Unknown',
-        expertise: 'Farmer',
-        verified: false
+        location: userProfile?.farm_address || "Unknown",
+        expertise: "Farmer",
+        verified: false,
       },
       content: newPost,
-      category: 'General',
+      category: "General",
       timestamp: new Date().toISOString(),
       likes: 0,
       comments: 0,
       shares: 0,
       liked: false,
-      bookmarked: false
+      bookmarked: false,
     };
-    
+
     setPosts([post, ...posts]);
-    setNewPost('');
+    setNewPost("");
     setShowNewPost(false);
   };
 
   const toggleLike = (postId) => {
-    setPosts(posts.map(post => 
-      post.id === postId 
-        ? { 
-            ...post, 
-            liked: !post.liked,
-            likes: post.liked ? post.likes - 1 : post.likes + 1
-          }
-        : post
-    ));
+    setPosts(
+      posts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              liked: !post.liked,
+              likes: post.liked ? post.likes - 1 : post.likes + 1,
+            }
+          : post
+      )
+    );
   };
 
   const toggleBookmark = (postId) => {
-    setPosts(posts.map(post => 
-      post.id === postId 
-        ? { ...post, bookmarked: !post.bookmarked }
-        : post
-    ));
+    setPosts(
+      posts.map((post) =>
+        post.id === postId ? { ...post, bookmarked: !post.bookmarked } : post
+      )
+    );
   };
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now - date;
-    
-    if (diff < 60000) return 'Just now';
+
+    if (diff < 60000) return "Just now";
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     return `${Math.floor(diff / 86400000)}d ago`;
   };
 
-  const filteredPosts = posts.filter(post => {
-    if (filter === 'all') return true;
+  const filteredPosts = posts.filter((post) => {
+    if (filter === "all") return true;
     return post.category.toLowerCase().includes(filter.toLowerCase());
   });
 
   const renderPost = (post) => (
-    <div key={post.id} className={`bg-white rounded-xl shadow-lg p-6 ${post.pinned ? 'border-l-4 border-green-500' : ''}`}>
+    <div
+      key={post.id}
+      className={`bg-white rounded-xl shadow-lg p-6 ${
+        post.pinned ? "border-l-4 border-green-500" : ""
+      }`}
+    >
       {post.pinned && (
         <div className="flex items-center text-green-600 text-sm font-medium mb-3">
           <Award className="w-4 h-4 mr-1" />
           Pinned Post
         </div>
       )}
-      
+
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
@@ -233,14 +252,16 @@ const CommunityPage = () => {
               {post.user.name.charAt(0)}
             </span>
           </div>
-          
+
           <div>
             <div className="flex items-center space-x-2">
               <h3 className="font-semibold text-gray-900">{post.user.name}</h3>
               {post.user.verified && (
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                  post.user.expert ? 'bg-purple-500' : 'bg-blue-500'
-                }`}>
+                <div
+                  className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                    post.user.expert ? "bg-purple-500" : "bg-blue-500"
+                  }`}
+                >
                   <Award className="w-3 h-3 text-white" />
                 </div>
               )}
@@ -256,7 +277,7 @@ const CommunityPage = () => {
             </div>
           </div>
         </div>
-        
+
         <button className="p-2 hover:bg-gray-100 rounded-lg">
           <MoreHorizontal className="w-5 h-5 text-gray-400" />
         </button>
@@ -272,14 +293,14 @@ const CommunityPage = () => {
       {/* Post Content */}
       <div className="mb-4">
         <p className="text-gray-800 whitespace-pre-line">{post.content}</p>
-        
+
         {post.images && (
           <div className="mt-3 grid grid-cols-1 gap-2">
             {post.images.map((image, index) => (
               <div key={index} className="rounded-lg overflow-hidden">
-                <img 
-                  src={image} 
-                  alt="Post content" 
+                <img
+                  src={image}
+                  alt="Post content"
                   className="w-full h-48 object-cover bg-gray-200"
                 />
               </div>
@@ -294,34 +315,40 @@ const CommunityPage = () => {
           <button
             onClick={() => toggleLike(post.id)}
             className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-              post.liked ? 'bg-red-50 text-red-600' : 'hover:bg-gray-50 text-gray-600'
+              post.liked
+                ? "bg-red-50 text-red-600"
+                : "hover:bg-gray-50 text-gray-600"
             }`}
           >
-            <Heart className={`w-5 h-5 ${post.liked ? 'fill-current' : ''}`} />
+            <Heart className={`w-5 h-5 ${post.liked ? "fill-current" : ""}`} />
             <span className="font-medium">{post.likes}</span>
           </button>
-          
+
           <button className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-600">
             <MessageCircle className="w-5 h-5" />
             <span className="font-medium">{post.comments}</span>
           </button>
-          
+
           <button className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-600">
             <Share2 className="w-5 h-5" />
             <span className="font-medium">{post.shares}</span>
           </button>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <button
             onClick={() => toggleBookmark(post.id)}
             className={`p-2 rounded-lg transition-colors ${
-              post.bookmarked ? 'bg-yellow-50 text-yellow-600' : 'hover:bg-gray-50 text-gray-400'
+              post.bookmarked
+                ? "bg-yellow-50 text-yellow-600"
+                : "hover:bg-gray-50 text-gray-400"
             }`}
           >
-            <Bookmark className={`w-5 h-5 ${post.bookmarked ? 'fill-current' : ''}`} />
+            <Bookmark
+              className={`w-5 h-5 ${post.bookmarked ? "fill-current" : ""}`}
+            />
           </button>
-          
+
           <button className="p-2 rounded-lg hover:bg-gray-50 text-gray-400">
             <Flag className="w-5 h-5" />
           </button>
@@ -335,7 +362,7 @@ const CommunityPage = () => {
       <div className="flex items-center space-x-3 mb-4">
         <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
           <span className="text-white font-bold">
-            {userProfile?.full_name?.charAt(0) || user?.name?.charAt(0) || 'U'}
+            {userProfile?.full_name?.charAt(0) || user?.name?.charAt(0) || "U"}
           </span>
         </div>
         <div className="flex-1">
@@ -348,7 +375,7 @@ const CommunityPage = () => {
           />
         </div>
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div className="flex space-x-4">
           <button className="flex items-center space-x-2 text-gray-600 hover:text-green-600">
@@ -364,7 +391,7 @@ const CommunityPage = () => {
             <span>Location</span>
           </button>
         </div>
-        
+
         <div className="flex space-x-3">
           <button
             onClick={() => setShowNewPost(false)}
@@ -396,10 +423,14 @@ const CommunityPage = () => {
           >
             <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white font-bold">
-                {userProfile?.full_name?.charAt(0) || user?.name?.charAt(0) || 'U'}
+                {userProfile?.full_name?.charAt(0) ||
+                  user?.name?.charAt(0) ||
+                  "U"}
               </span>
             </div>
-            <span className="text-gray-600">Share your farming experience...</span>
+            <span className="text-gray-600">
+              Share your farming experience...
+            </span>
           </button>
         </div>
       )}
@@ -415,16 +446,17 @@ const CommunityPage = () => {
             Clear Filters
           </button>
         </div>
-        
+
         <div className="flex flex-wrap gap-2">
-          {categories.map(category => (
+          {categories.map((category) => (
             <button
               key={category}
               onClick={() => setFilter(category.toLowerCase())}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === category.toLowerCase() || (filter === 'all' && category === 'All')
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                filter === category.toLowerCase() ||
+                (filter === "all" && category === "All")
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               {category}
@@ -434,9 +466,7 @@ const CommunityPage = () => {
       </div>
 
       {/* Posts */}
-      <div className="space-y-6">
-        {filteredPosts.map(renderPost)}
-      </div>
+      <div className="space-y-6">{filteredPosts.map(renderPost)}</div>
     </div>
   );
 
@@ -454,7 +484,9 @@ const CommunityPage = () => {
   const renderExperts = () => (
     <div className="text-center py-12">
       <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-gray-600 mb-2">Expert Network</h3>
+      <h3 className="text-xl font-semibold text-gray-600 mb-2">
+        Expert Network
+      </h3>
       <p className="text-gray-500 mb-6">Connect with agricultural experts</p>
       <button className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
         Browse Experts
@@ -465,7 +497,9 @@ const CommunityPage = () => {
   const renderGroups = () => (
     <div className="text-center py-12">
       <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-gray-600 mb-2">Farmer Groups</h3>
+      <h3 className="text-xl font-semibold text-gray-600 mb-2">
+        Farmer Groups
+      </h3>
       <p className="text-gray-500 mb-6">Join local farming communities</p>
       <button className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
         Join Groups
@@ -486,12 +520,18 @@ const CommunityPage = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'feed': return renderFeed();
-      case 'questions': return renderQuestions();
-      case 'experts': return renderExperts();
-      case 'groups': return renderGroups();
-      case 'marketplace': return renderMarketplace();
-      default: return renderFeed();
+      case "feed":
+        return renderFeed();
+      case "questions":
+        return renderQuestions();
+      case "experts":
+        return renderExperts();
+      case "groups":
+        return renderGroups();
+      case "marketplace":
+        return renderMarketplace();
+      default:
+        return renderFeed();
     }
   };
 
@@ -501,7 +541,7 @@ const CommunityPage = () => {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <button
-            onClick={() => navigate(-1)}
+            onClick={onBack ? onBack : () => navigate(-1)}
             className="mr-4 p-2 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow"
           >
             <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -530,7 +570,7 @@ const CommunityPage = () => {
       {/* Tabs */}
       <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
         <div className="flex space-x-1 overflow-x-auto">
-          {tabs.map(tab => {
+          {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <button
@@ -538,8 +578,8 @@ const CommunityPage = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-green-500 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? "bg-green-500 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 <Icon className="w-5 h-5" />

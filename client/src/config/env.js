@@ -92,6 +92,14 @@ const config = {
     default: import.meta.env.VITE_DEFAULT_LOCATION || 'Delhi',
   },
 
+  // Weather Configuration
+  weather: {
+    apiKey: import.meta.env.VITE_WEATHER_API_KEY || 'demo_key',
+    baseUrl: import.meta.env.VITE_WEATHER_BASE_URL || 'https://api.weatherapi.com/v1',
+    timeout: parseInt(import.meta.env.VITE_WEATHER_TIMEOUT) || 10000,
+    enableRealAPI: import.meta.env.VITE_ENABLE_REAL_WEATHER_API === 'true' || !!import.meta.env.VITE_WEATHER_API_KEY,
+  },
+
   // Contact Information
   contact: {
     email: import.meta.env.VITE_SUPPORT_EMAIL || 'support@farmwise.com',
