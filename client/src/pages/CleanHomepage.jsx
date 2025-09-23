@@ -44,6 +44,52 @@ const CleanHomepage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductModal, setShowProductModal] = useState(false);
   const productsCarouselRef = useRef(null);
+  const [currentProductsPage, setCurrentProductsPage] = useState(0);
+  const [productsPagesCount, setProductsPagesCount] = useState(1);
+
+  // Carousel pagination: compute pages based on container width and card width
+  useEffect(() => {
+    const el = productsCarouselRef.current;
+    if (!el) return;
+
+    const CARD_WIDTH = 240; // min/max width in UI
+    const GAP = 16; // gap-4 ~ 1rem (16px)
+
+    const computePages = () => {
+      const visibleWidth = el.clientWidth;
+      const perView = Math.max(1, Math.floor((visibleWidth + GAP) / (CARD_WIDTH + GAP)));
+      const totalItems = getFilteredProducts().slice(0, 12).length;
+      const pages = Math.max(1, Math.ceil(totalItems / perView));
+      setProductsPagesCount(pages);
+
+      const page = Math.round(el.scrollLeft / visibleWidth);
+      setCurrentProductsPage(Math.min(pages - 1, Math.max(0, page)));
+    };
+
+    computePages();
+    const ro = new ResizeObserver(computePages);
+    ro.observe(el);
+
+    const onScroll = () => {
+      const visibleWidth = el.clientWidth;
+      const page = Math.round(el.scrollLeft / visibleWidth);
+      setCurrentProductsPage(page);
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      try { ro.disconnect(); } catch {}
+      el.removeEventListener('scroll', onScroll);
+    };
+  }, [selectedCategory]);
+
+  const scrollToProductsPage = (pageIndex) => {
+    const el = productsCarouselRef.current;
+    if (!el) return;
+    const left = pageIndex * el.clientWidth;
+    el.scrollTo({ left, behavior: 'smooth' });
+    setCurrentProductsPage(pageIndex);
+  };
 
   // Initialize weather service
   const weatherService = new WeatherService();
@@ -816,9 +862,10 @@ const CleanHomepage = () => {
                   type="button"
                   className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow hover:bg-gray-50"
                   onClick={() => {
-                    if (productsCarouselRef.current) {
-                      productsCarouselRef.current.scrollBy({ left: -300, behavior: 'smooth' });
-                    }
+                    const el = productsCarouselRef.current;
+                    if (!el) return;
+                    const prevPage = Math.max(0, currentProductsPage - 1);
+                    scrollToProductsPage(prevPage);
                   }}
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -849,13 +896,27 @@ const CleanHomepage = () => {
                   type="button"
                   className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow hover:bg-gray-50"
                   onClick={() => {
-                    if (productsCarouselRef.current) {
-                      productsCarouselRef.current.scrollBy({ left: 300, behavior: 'smooth' });
-                    }
+                    const el = productsCarouselRef.current;
+                    if (!el) return;
+                    const nextPage = Math.min(productsPagesCount - 1, currentProductsPage + 1);
+                    scrollToProductsPage(nextPage);
                   }}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
+                {/* Dots pagination */}
+                <div className="mt-4 flex items-center justify-center gap-2">
+                  {Array.from({ length: productsPagesCount }).map((_, i) => (
+                    <button
+                      key={i}
+                      aria-label={`Go to page ${i + 1}`}
+                      className={`h-2 w-2 rounded-full ${
+                        i === currentProductsPage ? 'bg-green-600' : 'bg-green-200'
+                      }`}
+                      onClick={() => scrollToProductsPage(i)}
+                    />
+                  ))}
+                </div>
               </div>
             </section>
           </div>
