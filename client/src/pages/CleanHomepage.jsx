@@ -455,13 +455,36 @@ const CleanHomepage = () => {
     return 'bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 border-green-200';
   };
 
-  // Use real photo backgrounds available in public/
+  // Use real photo backgrounds: map condition categories to images
+  // Note: We only reference images that already exist in client/public
+  // Add more images under /public/weather and update the map when available.
   const getWeatherBgImage = (condition) => {
     const cond = (condition || '').toLowerCase();
-    // We have farm3.jpg and soil.jpg in client/public; use them appropriately
-    if (cond.includes('mist') || cond.includes('fog') || cond.includes('haze')) return '/soil.jpg';
-    // Default to farm/sky image for most conditions we have
-    return '/farm3.jpg';
+    const isSunny = cond.includes('sunny') || cond.includes('clear');
+    const isCloudy = cond.includes('cloud');
+    const isRain = cond.includes('rain') || cond.includes('drizzle');
+    const isStorm = cond.includes('thunder') || cond.includes('storm');
+    const isSnow = cond.includes('snow');
+    const isFog = cond.includes('mist') || cond.includes('fog') || cond.includes('haze');
+
+    // Map to images available in public/weather
+    const IMG_MAP = {
+      sunny: '/weather/sunny.avif',
+      cloudy: '/weather/cloudy sky.avif',
+      rain: '/weather/rainy.avif',
+      storm: '/weather/rainy.avif',
+      snow: '/weather/cloudy sky.avif',
+      fog: '/weather/cloudy sky.avif',
+      default: '/weather/cloudy sky.avif',
+    };
+
+    if (isFog) return IMG_MAP.fog;
+    if (isSunny) return IMG_MAP.sunny;
+    if (isCloudy) return IMG_MAP.cloudy;
+    if (isRain) return IMG_MAP.rain;
+    if (isStorm) return IMG_MAP.storm;
+    if (isSnow) return IMG_MAP.snow;
+    return IMG_MAP.default;
   };
 
   // Overlay to ensure text readability over photos
@@ -889,11 +912,14 @@ const CleanHomepage = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           {/* Left Side - Quick Actions */}
           <div className="lg:col-span-3">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="bg-white rounded-2xl shadow-md ring-1 ring-black/5 p-6 mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Quick Actions</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {quickActions.map((action) => (
                 <div
                   key={action.id}
@@ -912,6 +938,7 @@ const CleanHomepage = () => {
                   </div>
                 </div>
               ))}
+              </div>
             </div>
 
             {/* Soil Fertilizer Recommendation Section */}
@@ -1016,13 +1043,13 @@ const CleanHomepage = () => {
 
           {/* Right Side - Weather Widget */}
           <div className="lg:col-span-1">
-            <div className={`rounded-lg shadow-sm mb-6 border overflow-hidden relative`}>
+            <div className={`rounded-2xl shadow-md mb-6 overflow-hidden relative ring-1 ring-black/5`}> 
               <div
                 className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${getWeatherBgImage(weatherData.condition)})` }}
+                style={{ backgroundImage: `url("${getWeatherBgImage(weatherData.condition)}")` }}
                 aria-hidden="true"
               />
-              <div className={`absolute inset-0 ${getWeatherOverlayClass(weatherData.condition)}`} aria-hidden="true" />
+              <div className={`absolute inset-0 ${getWeatherOverlayClass(weatherData.condition)} backdrop-blur-[1.5px]`} aria-hidden="true" />
               <div className="relative p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-800">Weather</h3>
@@ -1105,6 +1132,7 @@ const CleanHomepage = () => {
                   })}
                 </div>
               </div>
+            </div>
             </div>
 
             {/* Weather Alerts */}
