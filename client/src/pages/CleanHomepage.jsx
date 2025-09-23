@@ -114,6 +114,7 @@ const CleanHomepage = () => {
 
   // Initialize weather service
   const weatherService = new WeatherService();
+  const isWeatherDemo = weatherService.isDemoMode;
 
   // Shop product data
   const products = [
@@ -374,21 +375,23 @@ const CleanHomepage = () => {
 
     const loadDefaultWeather = async () => {
       try {
-        // Default to Ahmedabad coordinates
+        // Default to New Delhi coordinates (fallback when geolocation fails)
+        const FALLBACK_LAT = 28.6139;
+        const FALLBACK_LON = 77.2090;
         const weather = await weatherService.getCurrentWeather(
-          23.0225,
-          72.5714
+          FALLBACK_LAT,
+          FALLBACK_LON
         );
         const forecast = await weatherService.getWeatherForecast(
-          23.0225,
-          72.5714
+          FALLBACK_LAT,
+          FALLBACK_LON
         );
-        const alerts = await weatherService.getWeatherAlerts(23.0225, 72.5714);
+        const alerts = await weatherService.getWeatherAlerts(FALLBACK_LAT, FALLBACK_LON);
 
         setWeatherData({
           temperature: Math.round(weather.temperature),
           humidity: weather.humidity,
-          location: weather.location || "Ahmedabad, Gujarat",
+          location: weather.location || "New Delhi, India",
           condition: weather.weather || weather.condition || "",
           forecast: forecast.forecast ? forecast.forecast.slice(0, 4) : [],
         });
@@ -399,7 +402,7 @@ const CleanHomepage = () => {
         setWeatherData({
           temperature: 28,
           humidity: 65,
-          location: "Ahmedabad, Gujarat",
+          location: "New Delhi, India",
           condition: "Sunny",
           forecast: [
             { day: "Today", high: 32, low: 24, condition: "Sunny" },
@@ -957,6 +960,11 @@ const CleanHomepage = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-800">Weather</h3>
                 <div className="flex items-center space-x-2">
+                  {isWeatherDemo && (
+                    <span className="text-xs text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200">
+                      Demo
+                    </span>
+                  )}
                   <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
                     {weatherData.condition || "--"}
                   </span>
