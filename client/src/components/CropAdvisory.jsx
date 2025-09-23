@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   Camera,
   Upload,
@@ -205,15 +205,7 @@ const CropAdvisory = ({ isOpen, onClose }) => {
           )}
         </div>
 
-        {/* Hidden file input */}
-        <input
-          type="file"
-          ref={imageInputRef}
-          accept="image/*"
-          capture="environment"
-          onChange={handleImageSelect}
-          style={{ display: "none" }}
-        />
+        {/* Image upload removed: using location + weather only */}
       </div>
     </div>
   );

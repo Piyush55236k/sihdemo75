@@ -5,7 +5,7 @@ import weatherService from './weatherService.js';
 class CropAdvisoryService {
   constructor() {
     // Use Python Flask backend for ML processing
-    this.API_BASE_URL = 'http://localhost:5001/api';
+    this.API_BASE_URL = 'https://sih-demo-djwa.onrender.com/api';
     this.MAIN_API_URL = config.api.baseUrl || 'http://localhost:5000/api';
     this.supportedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     this.maxImageSize = 5 * 1024 * 1024; // 5MB
@@ -17,8 +17,9 @@ class CropAdvisoryService {
    * @returns {Object} Validation result
    */
   validateSoilImage(imageFile) {
+    // Image is optional for the external API. If not provided, consider valid.
     if (!imageFile) {
-      return { valid: false, error: 'No image file provided' };
+      return { valid: true };
     }
 
     if (!this.supportedImageTypes.includes(imageFile.type)) {
@@ -47,7 +48,7 @@ class CropAdvisoryService {
    */
   async getCropAdvisory(soilImage, location, options = {}) {
     try {
-      // Validate image
+      // Validate image only if provided (image is optional)
       const imageValidation = this.validateSoilImage(soilImage);
       if (!imageValidation.valid) {
         throw new Error(imageValidation.error);
@@ -125,14 +126,18 @@ class CropAdvisoryService {
    */
   async callCropAdvisoryAPI(imageFile, location, additionalInfo = {}) {
     try {
-      // Convert image to base64 for JSON API
-      const imageBase64 = await this.fileToBase64(imageFile);
-      
+      // Prepare request body (image is optional)
+      let imageBase64 = null;
+      if (imageFile) {
+        imageBase64 = await this.fileToBase64(imageFile);
+      }
       const requestData = {
-        imageData: imageBase64,
         location: location,
         additionalInfo: additionalInfo
       };
+      if (imageBase64) {
+        requestData.imageData = imageBase64;
+      }
 
       console.log('📡 Calling Python ML API:', this.API_BASE_URL + '/crop-advisory');
 
@@ -140,6 +145,7 @@ class CropAdvisoryService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(requestData),
       });
