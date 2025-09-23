@@ -455,6 +455,27 @@ const CleanHomepage = () => {
     return 'bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 border-green-200';
   };
 
+  // Use real photo backgrounds available in public/
+  const getWeatherBgImage = (condition) => {
+    const cond = (condition || '').toLowerCase();
+    // We have farm3.jpg and soil.jpg in client/public; use them appropriately
+    if (cond.includes('mist') || cond.includes('fog') || cond.includes('haze')) return '/soil.jpg';
+    // Default to farm/sky image for most conditions we have
+    return '/farm3.jpg';
+  };
+
+  // Overlay to ensure text readability over photos
+  const getWeatherOverlayClass = (condition) => {
+    const cond = (condition || '').toLowerCase();
+    if (cond.includes('sunny') || cond.includes('clear')) return 'bg-white/55';
+    if (cond.includes('cloud')) return 'bg-white/60';
+    if (cond.includes('rain') || cond.includes('drizzle')) return 'bg-white/70';
+    if (cond.includes('thunder') || cond.includes('storm')) return 'bg-white/70';
+    if (cond.includes('snow')) return 'bg-white/65';
+    if (cond.includes('mist') || cond.includes('fog') || cond.includes('haze')) return 'bg-white/65';
+    return 'bg-white/60';
+  };
+
   // Helpers for forecast rendering
   const getForecastDayLabel = (item, index) => {
     if (!item) return "--";
@@ -995,7 +1016,14 @@ const CleanHomepage = () => {
 
           {/* Right Side - Weather Widget */}
           <div className="lg:col-span-1">
-            <div className={`rounded-lg shadow-sm p-6 mb-6 border ${getWeatherBgClasses(weatherData.condition)}`}>
+            <div className={`rounded-lg shadow-sm mb-6 border overflow-hidden relative`}>
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${getWeatherBgImage(weatherData.condition)})` }}
+                aria-hidden="true"
+              />
+              <div className={`absolute inset-0 ${getWeatherOverlayClass(weatherData.condition)}`} aria-hidden="true" />
+              <div className="relative p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-800">Weather</h3>
                 <div className="flex items-center space-x-2">
