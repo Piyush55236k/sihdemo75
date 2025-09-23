@@ -762,9 +762,7 @@ const CleanHomepage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Side - Quick Actions */}
           <div className="lg:col-span-3">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">
-              Quick Actions
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {quickActions.map((action) => (
                 <div
@@ -775,17 +773,10 @@ const CleanHomepage = () => {
                   <div className="flex items-start space-x-4">
                     <div className="text-3xl">{action.icon}</div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-gray-900">
-                        {action.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-3">
-                        {action.description}
-                      </p>
+                      <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-gray-900">{action.title}</h3>
+                      <p className="text-sm text-gray-600 mb-3">{action.description}</p>
                       <span className="text-sm text-gray-500">
-                        {currentLanguage === "hi"
-                          ? "अब उपलब्ध"
-                          : "Available now"}{" "}
-                        →
+                        {currentLanguage === "hi" ? "अब उपलब्ध" : "Available now"} →
                       </span>
                     </div>
                   </div>
@@ -797,21 +788,11 @@ const CleanHomepage = () => {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
               <div className="md:flex">
                 <div className="md:w-1/3">
-                  <img
-                    src="/soil.jpg"
-                    alt="Farm field"
-                    className="w-full h-48 md:h-full object-cover"
-                  />
+                  <img src="/soil.jpg" alt="Farm field" className="w-full h-48 md:h-full object-cover" />
                 </div>
                 <div className="md:w-2/3 p-6">
-                  <h3 className="text-xl font-bold text-gray-800 mb-3">
-                    Get a Soil Fertilizer Recommendation
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Get personalized fertilizer recommendations based on your
-                    soil analysis and crop type. Our ML-powered system provides
-                    accurate NPK and micronutrient suggestions.
-                  </p>
+                  <h3 className="text-xl font-bold text-gray-800 mb-3">Get a Soil Fertilizer Recommendation</h3>
+                  <p className="text-gray-600 mb-4">Get personalized fertilizer recommendations based on your soil analysis and crop type. Our ML-powered system provides accurate NPK and micronutrient suggestions.</p>
                   <button
                     onClick={() => handleQuickAction("soil-fertilizer")}
                     className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
@@ -823,6 +804,60 @@ const CleanHomepage = () => {
                 </div>
               </div>
             </div>
+
+            {/* Products Section - Sliding shop items */}
+            <section className="mt-8 bg-yellow-100 rounded-lg p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold text-gray-800">Check Our Products</h2>
+                <button onClick={() => setCurrentPage("shop")} className="text-green-700 hover:text-green-800 font-medium">View all →</button>
+              </div>
+              <div className="relative">
+                <button
+                  type="button"
+                  className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow hover:bg-gray-50"
+                  onClick={() => {
+                    if (productsCarouselRef.current) {
+                      productsCarouselRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <div ref={productsCarouselRef} className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 no-scrollbar">
+                  {getFilteredProducts().slice(0, 12).map((product) => (
+                    <div key={product.id} className="min-w-[240px] max-w-[240px] bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300 snap-start overflow-hidden">
+                      <div className="relative">
+                        <img src={product.image} alt={product.name} className="w-full h-40 object-cover" />
+                        <button onClick={() => openProductModal(product)} className="absolute bottom-2 right-2 bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg shadow flex items-center text-sm">
+                          <Eye className="w-4 h-4 mr-1" /> View
+                        </button>
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-gray-800 truncate">{product.name}</h3>
+                        <p className="text-sm text-gray-500 truncate">{product.category}</p>
+                        <div className="flex items-center justify-between mt-3">
+                          <span className="text-lg font-bold text-green-600">₹{product.price}</span>
+                          <button onClick={() => handleAddToCart(product)} className="inline-flex items-center bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 shadow">
+                            <ShoppingCart className="w-4 h-4 mr-1" /> Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow hover:bg-gray-50"
+                  onClick={() => {
+                    if (productsCarouselRef.current) {
+                      productsCarouselRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </section>
           </div>
 
           {/* Right Side - Weather Widget */}
@@ -960,96 +995,7 @@ const CleanHomepage = () => {
           </div>
         </div>
 
-        {/* Products Section - Sliding shop items */}
-        <section className="mt-16 bg-yellow-100 rounded-lg p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-gray-800">
-              Check Our Products
-            </h2>
-            <button
-              onClick={() => setCurrentPage("shop")}
-              className="text-green-700 hover:text-green-800 font-medium"
-            >
-              View all →
-            </button>
-          </div>
-          <div className="relative">
-            <button
-              type="button"
-              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow hover:bg-gray-50"
-              onClick={() => {
-                if (productsCarouselRef.current) {
-                  productsCarouselRef.current.scrollBy({
-                    left: -300,
-                    behavior: "smooth",
-                  });
-                }
-              }}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <div
-              ref={productsCarouselRef}
-              className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 no-scrollbar"
-            >
-              {getFilteredProducts()
-                .slice(0, 12)
-                .map((product) => (
-                  <div
-                    key={product.id}
-                    className="min-w-[240px] max-w-[240px] bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300 snap-start overflow-hidden"
-                  >
-                    <div className="relative">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-40 object-cover"
-                      />
-                      <button
-                        onClick={() => openProductModal(product)}
-                        className="absolute bottom-2 right-2 bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg shadow flex items-center text-sm"
-                      >
-                        <Eye className="w-4 h-4 mr-1" /> View
-                      </button>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-gray-800 truncate">
-                        {product.name}
-                      </h3>
-                      <p className="text-sm text-gray-500 truncate">
-                        {product.category}
-                      </p>
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="text-lg font-bold text-green-600">
-                          ₹{product.price}
-                        </span>
-                        <button
-                          onClick={() => handleAddToCart(product)}
-                          className="inline-flex items-center bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 shadow"
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-1" /> Add
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
-            <button
-              type="button"
-              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow hover:bg-gray-50"
-              onClick={() => {
-                if (productsCarouselRef.current) {
-                  productsCarouselRef.current.scrollBy({
-                    left: 300,
-                    behavior: "smooth",
-                  });
-                }
-              }}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </section>
+        {/* Products Section removed (moved above under left column) */}
 
         {/* Product Quick Modal */}
         {showProductModal && selectedProduct && (
