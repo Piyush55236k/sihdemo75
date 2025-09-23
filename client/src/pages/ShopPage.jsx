@@ -19,11 +19,11 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
   const categories = [
     "All",
     "Hand Tools",
-    "Irrigation Equipment", 
+    "Irrigation Equipment",
     "Seeds & Planting",
     "Fertilizers & Pesticides",
     "Farm Inputs",
-    "Maintenance & Protection"
+    "Maintenance & Protection",
   ];
 
   const shopProducts = [
@@ -36,27 +36,27 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/spade.jpg",
       description: "Heavy-duty spade for digging and soil preparation",
       rating: 4.5,
-      inStock: true
+      inStock: true,
     },
     {
       id: 2,
       name: "Hoes",
       price: 350,
-      category: "Hand Tools", 
+      category: "Hand Tools",
       image: "/shop-assests/hoes.jpg",
       description: "Sharp hoes for weeding and cultivation",
       rating: 4.3,
-      inStock: true
+      inStock: true,
     },
     {
       id: 3,
-      name: "Sickle", 
+      name: "Sickle",
       price: 280,
       category: "Hand Tools",
-      image: "/shop-assests/sickle.jpg", 
+      image: "/shop-assests/sickle.jpg",
       description: "Traditional sickle for harvesting crops",
       rating: 4.6,
-      inStock: true
+      inStock: true,
     },
     {
       id: 4,
@@ -66,7 +66,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/trowels.jpg",
       description: "Small hand trowels for precise gardening",
       rating: 4.2,
-      inStock: true
+      inStock: true,
     },
 
     // Irrigation Equipment
@@ -78,7 +78,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/sprinklers.jpg",
       description: "Efficient sprinkler system for irrigation",
       rating: 4.7,
-      inStock: true
+      inStock: true,
     },
     {
       id: 6,
@@ -88,7 +88,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/pressure sprayer pump.jpg",
       description: "High-pressure pump for pesticide application",
       rating: 4.4,
-      inStock: true
+      inStock: true,
     },
     {
       id: 7,
@@ -98,7 +98,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/irrigation kit.jpg",
       description: "Complete drip irrigation kit",
       rating: 4.8,
-      inStock: true
+      inStock: true,
     },
 
     // Seeds & Planting
@@ -110,7 +110,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/tomato seeds.jpg",
       description: "High-yield hybrid tomato seeds",
       rating: 4.6,
-      inStock: true
+      inStock: true,
     },
     {
       id: 9,
@@ -120,7 +120,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/rice seeds.jpg",
       description: "Premium quality rice seeds",
       rating: 4.5,
-      inStock: true
+      inStock: true,
     },
     {
       id: 10,
@@ -130,7 +130,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/wheat seeds.jpg",
       description: "High-protein wheat seeds",
       rating: 4.4,
-      inStock: true
+      inStock: true,
     },
     {
       id: 11,
@@ -140,7 +140,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/potato seeds.jpg",
       description: "Disease-resistant potato seeds",
       rating: 4.3,
-      inStock: true
+      inStock: true,
     },
     {
       id: 12,
@@ -150,7 +150,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/mango seeds.jpg",
       description: "Premium mango seeds for plantation",
       rating: 4.2,
-      inStock: true
+      inStock: true,
     },
     {
       id: 13,
@@ -160,7 +160,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/watermelon seeds.jpg",
       description: "Sweet watermelon seeds",
       rating: 4.7,
-      inStock: true
+      inStock: true,
     },
     {
       id: 14,
@@ -170,7 +170,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/cucumber seeds.jpg",
       description: "Fresh cucumber seeds",
       rating: 4.1,
-      inStock: true
+      inStock: true,
     },
 
     // Fertilizers & Pesticides
@@ -182,7 +182,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/organic fertilizer.jpg",
       description: "100% organic fertilizer for healthy crops",
       rating: 4.8,
-      inStock: true
+      inStock: true,
     },
     {
       id: 16,
@@ -192,7 +192,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/bio fertilizer.jpg",
       description: "Biological fertilizer with beneficial microorganisms",
       rating: 4.6,
-      inStock: true
+      inStock: true,
     },
     {
       id: 17,
@@ -202,7 +202,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/chemical fertilizer.jpg",
       description: "NPK chemical fertilizer for quick results",
       rating: 4.3,
-      inStock: true
+      inStock: true,
     },
     {
       id: 18,
@@ -212,7 +212,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/vermicompost.jpg",
       description: "Nutrient-rich vermicompost",
       rating: 4.7,
-      inStock: true
+      inStock: true,
     },
     {
       id: 19,
@@ -222,7 +222,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/biochar.jpg",
       description: "Soil conditioner biochar",
       rating: 4.4,
-      inStock: true
+      inStock: true,
     },
     {
       id: 20,
@@ -232,7 +232,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/pesticide.jpg",
       description: "Effective pesticide for crop protection",
       rating: 4.2,
-      inStock: true
+      inStock: true,
     },
     {
       id: 21,
@@ -242,7 +242,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/herbicides.jpg",
       description: "Selective herbicides for weed control",
       rating: 4.1,
-      inStock: true
+      inStock: true,
     },
     {
       id: 22,
@@ -252,7 +252,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/fungicides.jpg",
       description: "Fungicides for disease prevention",
       rating: 4.5,
-      inStock: true
+      inStock: true,
     },
 
     // Farm Inputs
@@ -264,7 +264,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/Grow bags.jpg",
       description: "Durable grow bags for container farming",
       rating: 4.3,
-      inStock: true
+      inStock: true,
     },
     {
       id: 24,
@@ -274,7 +274,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/jute.jpg",
       description: "Eco-friendly jute storage bags",
       rating: 4.4,
-      inStock: true
+      inStock: true,
     },
     {
       id: 25,
@@ -284,7 +284,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/soil testing kit.jpg",
       description: "Complete soil testing kit for pH and nutrients",
       rating: 4.6,
-      inStock: true
+      inStock: true,
     },
 
     // Maintenance & Protection
@@ -296,7 +296,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/Gloves.jpg",
       description: "Protective gloves for farming work",
       rating: 4.2,
-      inStock: true
+      inStock: true,
     },
     {
       id: 27,
@@ -306,7 +306,7 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/boots.jpg",
       description: "Waterproof farming boots",
       rating: 4.5,
-      inStock: true
+      inStock: true,
     },
     {
       id: 28,
@@ -316,15 +316,17 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
       image: "/shop-assests/Grease, lubricants, oils.jpg",
       description: "Multi-purpose grease and oils",
       rating: 4.1,
-      inStock: true
-    }
+      inStock: true,
+    },
   ];
 
   // Filter products based on category and search
-  const filteredProducts = shopProducts.filter(product => {
-    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredProducts = shopProducts.filter((product) => {
+    const matchesCategory =
+      selectedCategory === "All" || product.category === selectedCategory;
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -360,7 +362,9 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
               <ArrowLeft className="w-5 h-5" />
               <span className="font-medium">Back to Home</span>
             </button>
-            <h1 className="text-xl font-bold text-gray-800">Farmer Equipment Shop</h1>
+            <h1 className="text-xl font-bold text-gray-800">
+              Farmer Equipment Shop
+            </h1>
             <div className="flex items-center space-x-4">
               <div className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300 cursor-pointer">
                 <ShoppingCart className="w-6 h-6 text-gray-600 hover:text-green-600 transition-colors duration-300" />
@@ -447,7 +451,9 @@ const ShopPage = ({ onBack, currentLanguage = "en" }) => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {selectedCategory === "All" ? "All Products" : selectedCategory}
+                  {selectedCategory === "All"
+                    ? "All Products"
+                    : selectedCategory}
                 </h2>
                 <p className="text-gray-600">
                   {sortedProducts.length} products found

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Bell,
   User,
@@ -10,6 +10,11 @@ import {
   Leaf,
   Cloud,
   CloudRain,
+  ShoppingCart,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
 } from "lucide-react";
 import AuthModal from "../components/AuthModal";
 import PestCheckPage from "./PestCheckPage";
@@ -36,6 +41,9 @@ const CleanHomepage = () => {
   });
   const [weatherAlerts, setWeatherAlerts] = useState([]);
   const [isLoadingWeather, setIsLoadingWeather] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showProductModal, setShowProductModal] = useState(false);
+  const productsCarouselRef = useRef(null);
 
   // Initialize weather service
   const weatherService = new WeatherService();
@@ -268,7 +276,7 @@ const CleanHomepage = () => {
                   temperature: Math.round(weather.temperature),
                   humidity: weather.humidity,
                   location: weather.location,
-                  condition: weather.condition,
+                  condition: weather.weather || weather.condition || "",
                   forecast: forecast.forecast
                     ? forecast.forecast.slice(0, 4)
                     : [],
@@ -308,16 +316,13 @@ const CleanHomepage = () => {
           23.0225,
           72.5714
         );
-        const alerts = await weatherService.getWeatherAlerts(
-          23.0225,
-          72.5714
-        );
+        const alerts = await weatherService.getWeatherAlerts(23.0225, 72.5714);
 
         setWeatherData({
           temperature: Math.round(weather.temperature),
           humidity: weather.humidity,
           location: weather.location || "Ahmedabad, Gujarat",
-          condition: weather.condition,
+          condition: weather.weather || weather.condition || "",
           forecast: forecast.forecast ? forecast.forecast.slice(0, 4) : [],
         });
         setWeatherAlerts(alerts || []);
@@ -354,6 +359,29 @@ const CleanHomepage = () => {
       return <CloudRain className="w-12 h-12 text-blue-500" />;
     }
     return <Sun className="w-12 h-12 text-yellow-500" />;
+  };
+
+  // Helpers for forecast rendering
+  const getForecastDayLabel = (item, index) => {
+    if (!item) return "--";
+    if (index === 0) return "Today";
+    if (item.day) return item.day; // fallback for legacy structure
+    if (item.datetime) {
+      const d = new Date(item.datetime);
+      if (!isNaN(d)) {
+        return d.toLocaleDateString(undefined, { weekday: "short" });
+      }
+    }
+    return "Day";
+  };
+  const getForecastHighLow = (item) => {
+    if (!item) return { high: undefined, low: undefined };
+    const high = item.maxTemp ?? item.high ?? item.temperature;
+    const low =
+      item.minTemp ??
+      item.low ??
+      (item.temperature !== undefined ? item.temperature - 2 : undefined);
+    return { high, low };
   };
 
   // Quick actions data
@@ -456,6 +484,57 @@ const CleanHomepage = () => {
     setCurrentPage(page);
   };
 
+  // Refresh weather and alerts on demand
+  const handleRefreshWeather = async () => {
+    try {
+      setIsLoadingWeather(true);
+      const loc = await weatherService.getCurrentLocation();
+      const weather = await weatherService.getCurrentWeather(
+        loc.latitude,
+        loc.longitude
+      );
+      const forecast = await weatherService.getWeatherForecast(
+        loc.latitude,
+        loc.longitude
+      );
+      const alerts = await weatherService.getWeatherAlerts(
+        loc.latitude,
+        loc.longitude
+      );
+      setWeatherData({
+        temperature: Math.round(weather.temperature),
+        humidity: weather.humidity,
+        location: weather.location,
+        condition: weather.weather || weather.condition || "",
+        forecast: forecast.forecast ? forecast.forecast.slice(0, 4) : [],
+      });
+      setWeatherAlerts(alerts || []);
+    } catch (e) {
+      console.error("Refresh weather failed", e);
+    } finally {
+      setIsLoadingWeather(false);
+    }
+  };
+
+  // Product modal actions
+  const openProductModal = (product) => {
+    setSelectedProduct(product);
+    setShowProductModal(true);
+  };
+  const closeProductModal = () => {
+    setShowProductModal(false);
+    setSelectedProduct(null);
+  };
+  const handleAddToCart = (product) => {
+    alert(`Added ${product.name} to cart!`);
+    // keep modal open to allow view more, or close if desired
+  };
+  const handleViewDetails = (product) => {
+    setShowProductModal(false);
+    setSelectedProduct(null);
+    setCurrentPage("shop");
+  };
+
   // Render different pages based on current page
   if (currentPage === "pest-check") {
     return (
@@ -529,9 +608,15 @@ const CleanHomepage = () => {
             {/* Logo - First */}
             <div className="flex items-center space-x-3 group mr-8 px-3 py-2 rounded-lg hover:bg-green-50 transition-all duration-300 cursor-pointer">
               <div className="transform transition-transform duration-300 group-hover:scale-110">
-                <img src="/logo1.jpg" alt="AgroMitra Logo" className="w-10 h-10 rounded-lg" />
+                <img
+                  src="/logo1.jpg"
+                  alt="AgroMitra Logo"
+                  className="w-10 h-10 rounded-lg"
+                />
               </div>
-              <span className="text-2xl font-bold text-green-600 font-serif tracking-tight group-hover:text-green-700 transition-colors duration-300">AgroMitra</span>
+              <span className="text-2xl font-bold text-green-600 font-serif tracking-tight group-hover:text-green-700 transition-colors duration-300">
+                AgroMitra
+              </span>
             </div>
 
             {/* Navigation Links - Second (Taking remaining space) */}
@@ -583,7 +668,9 @@ const CleanHomepage = () => {
             {/* Right Side */}
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2 bg-green-100 px-3 py-2 rounded-full hover:bg-green-200 transition-colors duration-300 cursor-pointer">
-                <span className="text-green-700 font-semibold text-sm">50 🌟</span>
+                <span className="text-green-700 font-semibold text-sm">
+                  50 🌟
+                </span>
               </div>
               <button
                 onClick={() => (window.location.href = "/notifications")}
@@ -659,7 +746,7 @@ const CleanHomepage = () => {
               <br />
               to AgroMitra
             </h1>
-            <button 
+            <button
               onClick={() => setCurrentPage("community")}
               className="bg-white text-green-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors flex items-center space-x-2 mx-auto"
             >
@@ -743,9 +830,22 @@ const CleanHomepage = () => {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-800">Weather</h3>
-                <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
-                  {weatherData.condition}
-                </span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
+                    {weatherData.condition || "--"}
+                  </span>
+                  <button
+                    onClick={handleRefreshWeather}
+                    className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600"
+                    title="Refresh weather"
+                  >
+                    <RefreshCw
+                      className={`w-4 h-4 ${
+                        isLoadingWeather ? "animate-spin" : ""
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
 
               <div className="text-center mb-4">
@@ -780,17 +880,21 @@ const CleanHomepage = () => {
                   4-Day Forecast
                 </h4>
                 <div className="space-y-2">
-                  {weatherData.forecast.map((day, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <span className="text-gray-600">{day.day}</span>
-                      <span className="text-gray-800">
-                        {day.high}°-{day.low}°
-                      </span>
-                    </div>
-                  ))}
+                  {weatherData.forecast.map((item, index) => {
+                    const label = getForecastDayLabel(item, index);
+                    const { high, low } = getForecastHighLow(item);
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <span className="text-gray-600">{label}</span>
+                        <span className="text-gray-800">
+                          {high ?? "--"}°-{low ?? "--"}°
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -801,9 +905,17 @@ const CleanHomepage = () => {
                 <div className="flex items-start space-x-2">
                   <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
                   <div>
-                    <h4 className="font-medium text-yellow-800 mb-1">
-                      Weather Alerts
-                    </h4>
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-yellow-800">
+                        Weather Alerts
+                      </h4>
+                      <button
+                        onClick={handleRefreshWeather}
+                        className="flex items-center text-xs text-yellow-800 hover:text-yellow-900 bg-yellow-100 hover:bg-yellow-200 px-2 py-1 rounded"
+                      >
+                        <RefreshCw className="w-3 h-3 mr-1" /> Refresh
+                      </button>
+                    </div>
                     <div className="space-y-2">
                       {weatherAlerts.map((alert, index) => (
                         <div key={index} className="bg-yellow-100 rounded p-3">
@@ -811,7 +923,9 @@ const CleanHomepage = () => {
                             {alert.title || alert.event || "Weather Alert"}
                           </h5>
                           <p className="text-xs text-yellow-700 mt-1">
-                            {alert.description || alert.desc || "No description available"}
+                            {alert.description ||
+                              alert.desc ||
+                              "No description available"}
                           </p>
                           {alert.farmingAdvice && (
                             <p className="text-xs text-yellow-600 mt-2 font-medium">
@@ -846,39 +960,150 @@ const CleanHomepage = () => {
           </div>
         </div>
 
-        {/* Products Section */}
+        {/* Products Section - Sliding shop items */}
         <section className="mt-16 bg-yellow-100 rounded-lg p-8">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-            Check Our Products
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((item) => (
-              <div
-                key={item}
-                className="bg-white rounded-lg p-6 text-center shadow-sm"
-              >
-                <div className="w-20 h-20 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <Leaf className="w-10 h-10 text-green-600" />
-                </div>
-                <h3 className="font-semibold text-gray-800">
-                  Farming Products
-                </h3>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-bold text-gray-800">
+              Check Our Products
+            </h2>
+            <button
+              onClick={() => setCurrentPage("shop")}
+              className="text-green-700 hover:text-green-800 font-medium"
+            >
+              View all →
+            </button>
           </div>
-          <div className="flex justify-center mt-6">
-            <div className="flex space-x-2">
-              {[0, 1, 2, 3, 4].map((dot) => (
-                <div
-                  key={dot}
-                  className={`w-2 h-2 rounded-full ${
-                    dot === 0 ? "bg-gray-800" : "bg-gray-400"
-                  }`}
-                ></div>
-              ))}
+          <div className="relative">
+            <button
+              type="button"
+              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow hover:bg-gray-50"
+              onClick={() => {
+                if (productsCarouselRef.current) {
+                  productsCarouselRef.current.scrollBy({
+                    left: -300,
+                    behavior: "smooth",
+                  });
+                }
+              }}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div
+              ref={productsCarouselRef}
+              className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 no-scrollbar"
+            >
+              {getFilteredProducts()
+                .slice(0, 12)
+                .map((product) => (
+                  <div
+                    key={product.id}
+                    className="min-w-[240px] max-w-[240px] bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300 snap-start overflow-hidden"
+                  >
+                    <div className="relative">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-40 object-cover"
+                      />
+                      <button
+                        onClick={() => openProductModal(product)}
+                        className="absolute bottom-2 right-2 bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg shadow flex items-center text-sm"
+                      >
+                        <Eye className="w-4 h-4 mr-1" /> View
+                      </button>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-800 truncate">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 truncate">
+                        {product.category}
+                      </p>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-lg font-bold text-green-600">
+                          ₹{product.price}
+                        </span>
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          className="inline-flex items-center bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 shadow"
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-1" /> Add
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
             </div>
+            <button
+              type="button"
+              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow hover:bg-gray-50"
+              onClick={() => {
+                if (productsCarouselRef.current) {
+                  productsCarouselRef.current.scrollBy({
+                    left: 300,
+                    behavior: "smooth",
+                  });
+                }
+              }}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         </section>
+
+        {/* Product Quick Modal */}
+        {showProductModal && selectedProduct && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            onClick={closeProductModal}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative">
+                <img
+                  src={selectedProduct.image}
+                  alt={selectedProduct.name}
+                  className="w-full h-48 object-cover"
+                />
+                <button
+                  className="absolute top-2 right-2 bg-white/90 hover:bg-white px-2 py-1 rounded"
+                  onClick={closeProductModal}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-gray-800">
+                  {selectedProduct.name}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {selectedProduct.category}
+                </p>
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-2xl font-bold text-green-600">
+                    ₹{selectedProduct.price}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      className="inline-flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 shadow"
+                      onClick={() => handleAddToCart(selectedProduct)}
+                    >
+                      <ShoppingCart className="w-4 h-4 mr-2" /> Add to Cart
+                    </button>
+                    <button
+                      className="inline-flex items-center bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200"
+                      onClick={() => handleViewDetails(selectedProduct)}
+                    >
+                      <Eye className="w-4 h-4 mr-2" /> View Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer */}
@@ -888,8 +1113,14 @@ const CleanHomepage = () => {
             {/* Logo and Description */}
             <div className="md:col-span-1">
               <div className="flex items-center space-x-2 mb-4">
-                <img src="/logo1.jpg" alt="AgroMitra Logo" className="w-8 h-8" />
-                <span className="text-2xl font-bold text-green-600">AgroMitra</span>
+                <img
+                  src="/logo1.jpg"
+                  alt="AgroMitra Logo"
+                  className="w-8 h-8"
+                />
+                <span className="text-2xl font-bold text-green-600">
+                  AgroMitra
+                </span>
               </div>
               <p className="text-sm text-gray-600 mb-4">
                 Making next machines work. Start with recruitment data, do more
