@@ -192,14 +192,13 @@ class WeatherService {
   enhanceAlertsWithFarmingAdvice(apiAlerts, latitude, longitude) {
     const enhancedAlerts = this.formatAlerts(apiAlerts);
     
-    // If no API alerts, or less than 1 alert, add some contextual farming alerts
-    if (enhancedAlerts.length < 2) { // Changed from < 1 to < 2 to ensure we always have alerts
+    // Only augment with demo alerts when running in demo mode
+    if (this.isDemoMode && enhancedAlerts.length < 2) {
       const demoAlerts = this.getMockAlertsData(latitude, longitude);
-      enhancedAlerts.push(...demoAlerts.slice(0, 3)); // Add up to 3 demo alerts
+      enhancedAlerts.push(...demoAlerts.slice(0, 3));
     }
     
     console.log('🚨 Final alerts count:', enhancedAlerts.length, enhancedAlerts);
-    
     return enhancedAlerts;
   }
 
